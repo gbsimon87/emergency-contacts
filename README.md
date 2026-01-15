@@ -39,6 +39,28 @@ It intentionally avoids technical jargon.
 - [x] Health check endpoint available
 - [x] Server correctly serves the frontend in production
 
+### Deployment & Source Control
+
+- [x] Project pushed to GitHub
+- [x] Render web service created and connected to GitHub
+- [x] App deployed live on Render
+- [x] Production build serves the frontend successfully
+- [x] Health endpoint works in production (`/api/health`)
+
+## 🟡 What We Are Building Now (MVP)
+
+### MVP Core
+
+- [ ] Add a small starter dataset of emergency numbers (a few countries)
+- [ ] Create API endpoints to retrieve emergency numbers
+- [ ] Build the “panic screen” UI (big buttons: police/ambulance/fire)
+- [ ] Add country picker + remember selection
+
+### Reliability (after core works)
+
+- [ ] Add caching / offline basics
+- [ ] Add source + “last verified” metadata for trust
+
 ---
 
 ## 🎯 Phase 0 MVP Goal (Plain English)
