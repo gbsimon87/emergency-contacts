@@ -5,11 +5,17 @@ const STORAGE_KEY = "ec_selected_country_iso2";
 
 function CallButton({ label, number }) {
   const disabled = !number;
-  const href = number ? `tel:${number}` : undefined;
+
+  function handleClick(e) {
+    if (disabled) return;
+    const ok = window.confirm(`Call ${label}: ${number}?`);
+    if (!ok) e.preventDefault();
+  }
 
   return (
     <a
-      href={href}
+      href={number ? `tel:${number}` : undefined}
+      onClick={handleClick}
       className={[
         "block w-full rounded-2xl border p-4 text-left",
         "active:scale-[0.99] transition",
@@ -38,6 +44,7 @@ export default function App() {
   );
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loadingCountry, setLoadingCountry] = useState(false);
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
   // Load country list for picker
@@ -75,6 +82,25 @@ export default function App() {
     })();
   }, [selectedIso2]);
 
+  const filteredCountries = useMemo(() => {
+    if (!search.trim()) return countries;
+
+    const q = search.toLowerCase();
+    return countries.filter((c) => c.name.toLowerCase().includes(q));
+  }, [countries, search]);
+
+  // Keep selectedIso2 in sync with the filtered list.
+  // If the selected country disappears due to search filtering,
+  // automatically pick the first match so numbers update.
+  useEffect(() => {
+    if (!filteredCountries.length) return;
+
+    const stillVisible = filteredCountries.some((c) => c.iso2 === selectedIso2);
+    if (!stillVisible && search.trim()) {
+      setSelectedIso2(filteredCountries[0].iso2);
+    }
+  }, [filteredCountries, selectedIso2, search]);
+
   const services = useMemo(
     () => selectedCountry?.services || {},
     [selectedCountry]
@@ -94,17 +120,32 @@ export default function App() {
 
         <section className="rounded-2xl border p-4 space-y-3">
           <label className="block text-sm font-medium">Country</label>
+
+          <input
+            type="text"
+            placeholder="Search country…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border px-3 py-2 text-sm"
+          />
+
           <select
             value={selectedIso2}
             onChange={(e) => setSelectedIso2(e.target.value)}
             className="w-full rounded-xl border px-3 py-2"
           >
-            {countries.map((c) => (
+            {filteredCountries.map((c) => (
               <option key={c.iso2} value={c.iso2}>
                 {c.name}
               </option>
             ))}
           </select>
+
+          {filteredCountries.length === 0 && (
+            <p className="text-sm opacity-70">
+              No countries match your search.
+            </p>
+          )}
 
           {loadingCountry && (
             <p className="text-sm opacity-70">Loading numbers…</p>
