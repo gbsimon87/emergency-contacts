@@ -47,39 +47,45 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
+  async function fetchCountries() {
+    try {
+      setError("");
+      const res = await fetch("/api/countries");
+      if (!res.ok) throw new Error("Failed to load countries");
+      const data = await res.json();
+      setCountries(data);
+    } catch {
+      setError("Can't reach the server right now. Please try again.");
+    }
+  }
+
+  async function fetchCountryDetails(iso2) {
+    try {
+      setLoadingCountry(true);
+      setError("");
+      const res = await fetch(`/api/countries/${iso2}`);
+      if (!res.ok) throw new Error("Failed to load country details");
+      const data = await res.json();
+      setSelectedCountry(data);
+      localStorage.setItem(STORAGE_KEY, iso2);
+    } catch {
+      setError(
+        "Can't load updated numbers right now. Showing last available info."
+      );
+      // Keep selectedCountry as-is (last known numbers)
+    } finally {
+      setLoadingCountry(false);
+    }
+  }
+
   // Load country list for picker
   useEffect(() => {
-    (async () => {
-      try {
-        setError("");
-        const res = await fetch("/api/countries");
-        if (!res.ok) throw new Error("Failed to load countries");
-        const data = await res.json();
-        setCountries(data);
-      } catch (e) {
-        setError(e.message || "Something went wrong");
-      }
-    })();
+    fetchCountries();
   }, []);
 
   // Load selected country details
   useEffect(() => {
-    (async () => {
-      try {
-        setLoadingCountry(true);
-        setError("");
-        const res = await fetch(`/api/countries/${selectedIso2}`);
-        if (!res.ok) throw new Error("Failed to load country details");
-        const data = await res.json();
-        setSelectedCountry(data);
-        localStorage.setItem(STORAGE_KEY, selectedIso2);
-      } catch (e) {
-        setError(e.message || "Something went wrong");
-        setSelectedCountry(null);
-      } finally {
-        setLoadingCountry(false);
-      }
-    })();
+    fetchCountryDetails(selectedIso2);
   }, [selectedIso2]);
 
   const filteredCountries = useMemo(() => {
@@ -158,7 +164,21 @@ export default function App() {
             </p>
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <div className="rounded-xl border p-3 space-y-2">
+              <p className="text-sm text-red-600">{error}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  fetchCountries();
+                  fetchCountryDetails(selectedIso2);
+                }}
+                className="w-full rounded-xl border px-3 py-2 text-sm font-medium hover:bg-black/5"
+              >
+                Retry
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="space-y-3">

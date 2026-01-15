@@ -32,12 +32,23 @@ It intentionally avoids technical jargon.
 - [x] React app created
 - [x] Tailwind CSS installed and working
 - [x] Basic UI renders correctly
+- [x] Country picker works
+- [x] Country search works
+- [x] Last selected country is remembered
 
 ### Backend (Server)
 
 - [x] Express server running
 - [x] Health check endpoint available
 - [x] Server correctly serves the frontend in production
+- [x] Read-only API endpoints return emergency numbers
+  - [x] List countries: `/api/countries`
+  - [x] Country details: `/api/countries/:iso2`
+
+### Data
+
+- [x] Starter dataset of emergency numbers exists (small set of countries)
+- [x] Services labeled clearly (general / police / ambulance / fire)
 
 ### Deployment & Source Control
 
@@ -47,25 +58,28 @@ It intentionally avoids technical jargon.
 - [x] Production build serves the frontend successfully
 - [x] Health endpoint works in production (`/api/health`)
 
-## 🟡 What We Are Building Now (MVP)
+---
 
-### MVP Core
+## 🟡 Phase 0 MVP — What We Are Building Next
 
-- [x] Add a small starter dataset of emergency numbers (a few countries)
-- [x] Create API endpoints to retrieve emergency numbers
-- [x] Build the “panic screen” UI (big buttons: police/ambulance/fire)
-- [x] Add country picker + remember selection
+### Safety & Clarity
 
-### MVP Polish
+- [x] Add a “confirm before calling” step (to avoid accidental taps)
+- [ ] Keep country selection clearly visible at all times
+- [ ] Improve disclaimer wording and placement
 
-- [ ] Add a “confirm before calling” toggle (optional safety)
-- [ ] Add search in country picker (helps once country list grows)
-- [ ] Improve error state when API is unavailable
+### Usability
 
-### Reliability (after core works)
+- [x] Add search in the country picker (needed once the list grows)
+- [ ] Improve error state when API is unavailable (retry + fallback behavior)
+- [ ] Add a better loading state (simple skeleton or placeholder)
 
-- [ ] Add caching / offline basics
-- [ ] Add source + “last verified” metadata for trust
+### Data Quality (still Phase 0)
+
+- [ ] Expand dataset to more countries (start with top travel destinations)
+- [ ] Add metadata fields:
+  - [ ] Data source (where the number came from)
+  - [ ] Last verified date
 
 ---
 
@@ -81,70 +95,9 @@ It intentionally avoids technical jargon.
 
 ---
 
-## 🟡 Phase 0 MVP — What We Are Building Now
-
-### 1. Emergency Numbers Data (Core)
-
-- [ ] Decide on a simple, human-readable data format
-- [ ] Create an initial list of emergency numbers for a small set of countries
-- [ ] Clearly label services:
-  - Police
-  - Ambulance
-  - Fire
-- [ ] Include a “general emergency” number where applicable
-
-**Why:** The app is useless without trustworthy data.
-
----
-
-### 2. Backend API (Minimal)
-
-- [ ] Create an API endpoint that returns emergency numbers
-- [ ] Endpoint should support:
-  - Fetching all countries
-  - Fetching a single country by code or name
-- [ ] Keep the API read-only for now
-
-**Why:** This allows the frontend to stay simple and flexible.
-
----
-
-### 3. Country Selection (Frontend)
-
-- [ ] Display a list of available countries
-- [ ] Allow the user to manually select a country
-- [ ] Remember the last selected country during the session
-
-**Why:** Manual selection is reliable and avoids location complexity early on.
-
----
-
-### 4. Emergency “Panic Screen” UI
-
-- [ ] Show the selected country clearly
-- [ ] Display large, easy-to-tap buttons for:
-  - Police
-  - Ambulance
-  - Fire
-- [ ] Buttons should:
-  - Clearly show the phone number
-  - Trigger a phone call on tap (where supported)
-
-**Why:** This screen is the entire product.
-
----
-
-### 5. Basic Safety & Clarity
-
-- [ ] Add a short disclaimer (e.g. “Verify before calling if possible”)
-- [ ] Confirm country selection is visible at all times
-- [ ] Avoid accidental calls (simple confirmation if needed)
-
----
-
 ## 🔜 Next After MVP (Not Yet)
 
-These are **intentionally postponed** until the MVP is usable:
+These are intentionally postponed until the MVP is solid:
 
 - [ ] Automatic location detection
 - [ ] Offline support
