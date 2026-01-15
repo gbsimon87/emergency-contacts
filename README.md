@@ -76,7 +76,7 @@ It intentionally avoids technical jargon.
 
 ### Data Quality (still Phase 0)
 
-- [ ] Expand dataset to more countries (start with top travel destinations)
+- [x] Expand dataset to more countries (start with top travel destinations)
 - [ ] Add metadata fields:
   - [ ] Data source (where the number came from)
   - [ ] Last verified date
