@@ -47,8 +47,14 @@ It intentionally avoids technical jargon.
 
 ### Data
 
-- [x] Starter dataset of emergency numbers exists (small set of countries)
+- [x] Expanded dataset covering major global travel destinations
 - [x] Services labeled clearly (general / police / ambulance / fire)
+
+### Reliability
+
+- [x] Graceful handling of network/API failures
+- [x] Clear error messaging with retry option
+- [x] Last-known emergency numbers remain visible during failures
 
 ### Deployment & Source Control
 
@@ -60,26 +66,50 @@ It intentionally avoids technical jargon.
 
 ---
 
-## 🟡 Phase 0 MVP — What We Are Building Next
+## 🟡 Phase 0 MVP — Highest-Value Next Steps
 
-### Safety & Clarity
+These are ordered by **user trust and speed under stress**, not technical interest.
 
-- [x] Add a “confirm before calling” step (to avoid accidental taps)
-- [ ] Keep country selection clearly visible at all times
-- [ ] Improve disclaimer wording and placement
+---
 
-### Usability
+### 1. Trust & Credibility (Top Priority)
 
-- [x] Add search in the country picker (needed once the list grows)
-- [ ] Improve error state when API is unavailable (retry + fallback behavior)
-- [ ] Add a better loading state (simple skeleton or placeholder)
+**Goal:** Users should trust the numbers instantly.
 
-### Data Quality (still Phase 0)
-
-- [x] Expand dataset to more countries (start with top travel destinations)
-- [ ] Add metadata fields:
-  - [ ] Data source (where the number came from)
+- [ ] Add metadata fields to emergency data:
+  - [x] Data source (e.g. government / telecom / standards body)
   - [ ] Last verified date
+- [ ] Display this information in a subtle, non-intrusive way
+
+**Why this matters:**  
+In an emergency, uncertainty causes hesitation.
+
+---
+
+### 2. Speed & Visual Clarity
+
+**Goal:** Reduce thinking and hesitation.
+
+- [ ] Keep selected country clearly visible at all times
+- [ ] Improve disclaimer wording and placement (short, calm, readable)
+- [ ] Improve loading state (simple placeholder or skeleton)
+
+**Why this matters:**  
+The app should feel calm, obvious, and reassuring.
+
+---
+
+### 3. Data Coverage (Incremental)
+
+**Goal:** Make the app useful for more people.
+
+- [ ] Continue expanding dataset country-by-country
+- [ ] Prioritize:
+  - High travel volume countries
+  - Regions with non-obvious emergency numbers
+
+**Why this matters:**  
+Coverage increases usefulness without adding UI complexity.
 
 ---
 
@@ -95,12 +125,12 @@ It intentionally avoids technical jargon.
 
 ---
 
-## 🔜 Next After MVP (Not Yet)
+## 🔜 After Phase 0 (Explicitly Not Yet)
 
-These are intentionally postponed until the MVP is solid:
+These are intentionally postponed until Phase 0 is clearly successful:
 
 - [ ] Automatic location detection
-- [ ] Offline support
+- [ ] Offline-first support
 - [ ] Nearby hospitals / embassies
 - [ ] Medical profiles
 - [ ] User accounts
@@ -111,14 +141,13 @@ These are intentionally postponed until the MVP is solid:
 
 ## 🚀 Definition of “MVP Complete”
 
-Phase 0 is considered done when:
+Phase 0 is complete when:
 
 - A real user can open the app
 - Pick a country
 - See accurate emergency numbers
 - Call them in under 30 seconds
-
-Everything else is secondary.
+- Even with poor connectivity or momentary failures
 
 ---
 

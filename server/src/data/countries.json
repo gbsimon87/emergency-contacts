@@ -1,12 +1,214 @@
 [
   {
-    "iso2": "US",
-    "name": "United States",
+    "iso2": "AF",
+    "name": "Afghanistan",
+    "services": { "police": "119", "ambulance": "112", "fire": "119" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AL",
+    "name": "Albania",
+    "services": { "police": "129", "ambulance": "127", "fire": "128" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "DZ",
+    "name": "Algeria",
+    "services": { "police": "1548", "ambulance": "14", "fire": "1055" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AD",
+    "name": "Andorra",
+    "services": { "police": "110", "ambulance": "116", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AO",
+    "name": "Angola",
+    "services": { "police": "113", "ambulance": ["112", "116"], "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AR",
+    "name": "Argentina",
     "services": {
       "general": "911",
       "police": "911",
-      "ambulance": "911",
-      "fire": "911"
+      "ambulance": "107",
+      "fire": "100"
+    }
+  },
+  {
+    "iso2": "AU",
+    "name": "Australia",
+    "services": {
+      "general": "000",
+      "police": "000",
+      "ambulance": "000",
+      "fire": "000"
+    }
+  },
+  {
+    "iso2": "AT",
+    "name": "Austria",
+    "services": { "police": ["112", "133"], "ambulance": "144", "fire": "122" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AZ",
+    "name": "Azerbaijan",
+    "services": {
+      "police": ["112", "102"],
+      "ambulance": ["112", "103"],
+      "fire": ["112", "101"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BB",
+    "name": "Barbados",
+    "services": { "police": "211", "ambulance": "511", "fire": "311" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BY",
+    "name": "Belarus",
+    "services": { "police": "102", "ambulance": "103", "fire": "101" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BE",
+    "name": "Belgium",
+    "services": {
+      "police": ["101", "112"],
+      "ambulance": "112",
+      "fire": "1722"
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BJ",
+    "name": "Benin",
+    "services": { "police": "117", "ambulance": "112", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BT",
+    "name": "Bhutan",
+    "services": { "police": "113", "ambulance": "112", "fire": "110" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BA",
+    "name": "Bosnia and Herzegovina",
+    "services": { "police": "122", "ambulance": "124", "fire": "123" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BW",
+    "name": "Botswana",
+    "services": { "police": "999", "ambulance": "997", "fire": "998" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BR",
+    "name": "Brazil",
+    "services": { "police": "190", "ambulance": "192", "fire": "193" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BN",
+    "name": "Brunei",
+    "services": { "police": "993", "ambulance": "991", "fire": "995" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BG",
+    "name": "Bulgaria",
+    "services": {
+      "police": ["112", "166"],
+      "ambulance": ["112", "150"],
+      "fire": ["112", "160"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BF",
+    "name": "Burkina Faso",
+    "services": { "police": "17", "ambulance": "112", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BI",
+    "name": "Burundi",
+    "services": { "police": "117", "ambulance": "112", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "KH",
+    "name": "Cambodia",
+    "services": { "police": "117", "ambulance": "119", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
@@ -20,13 +222,333 @@
     }
   },
   {
-    "iso2": "GB",
-    "name": "United Kingdom",
+    "iso2": "CV",
+    "name": "Cape Verde",
+    "services": { "police": "132", "ambulance": "130", "fire": "131" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CF",
+    "name": "Central African Republic",
+    "services": { "police": "117", "ambulance": "1220", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TD",
+    "name": "Chad",
+    "services": { "police": "17", "ambulance": "22514242", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CL",
+    "name": "Chile",
+    "services": { "police": "133", "ambulance": "131", "fire": "132" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CN",
+    "name": "People's Republic of China",
+    "services": { "police": "110", "ambulance": "120", "fire": "119" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CO",
+    "name": "Colombia",
+    "services": { "police": "112", "ambulance": "125", "fire": "119" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "KM",
+    "name": "Comoros",
+    "services": { "police": "17", "ambulance": "7720373", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CG",
+    "name": "Republic of Congo",
+    "services": { "police": "117", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "HR",
+    "name": "Croatia",
     "services": {
-      "general": "999",
-      "police": "999",
-      "ambulance": "999",
-      "fire": "999"
+      "police": ["112", "192"],
+      "ambulance": ["112", "194"],
+      "fire": ["112", "193"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CU",
+    "name": "Cuba",
+    "services": { "police": "106", "ambulance": "104", "fire": "105" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CW",
+    "name": "Curacao",
+    "services": { "police": "911", "ambulance": "910912", "fire": "911" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CZ",
+    "name": "Czech Republic",
+    "services": {
+      "police": ["112", "158"],
+      "ambulance": ["112", "155"],
+      "fire": ["112", "150"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "KP",
+    "name": "Democratic People's Republic of Korea",
+    "services": { "ambulance": ["110", "8119"] },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CD",
+    "name": "Democratic Republic of Congo",
+    "services": { "police": "112", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "DJ",
+    "name": "Djibouti",
+    "services": { "police": "17", "ambulance": "19", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "EG",
+    "name": "Egypt",
+    "services": { "police": ["112", "122"], "ambulance": "123", "fire": "180" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SV",
+    "name": "El Salvador",
+    "services": { "police": "911", "ambulance": "132", "fire": "913" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GQ",
+    "name": "Equatorial Guinea",
+    "services": { "police": "114", "ambulance": "115", "fire": "112" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "ER",
+    "name": "Eritrea",
+    "services": { "police": "113", "ambulance": "114", "fire": "116" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SZ",
+    "name": "Eswatini",
+    "services": { "police": "999", "ambulance": "977", "fire": "933" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "FR",
+    "name": "France",
+    "services": {
+      "police": ["112", "17"],
+      "ambulance": ["112", "15"],
+      "fire": ["112", "18"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GA",
+    "name": "Gabon",
+    "services": { "police": "1730", "ambulance": "1300", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GM",
+    "name": "Gambia",
+    "services": { "police": "117", "ambulance": "116", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "DE",
+    "name": "Germany",
+    "services": {
+      "police": "110",
+      "ambulance": "112",
+      "fire": ["110112112", "911112192221161171161160800190999908006888000"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GI",
+    "name": "Gibraltar",
+    "services": {
+      "police": ["199", "112", "999"],
+      "ambulance": ["190", "112", "999"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GR",
+    "name": "Greece",
+    "services": { "police": "100", "ambulance": "166", "fire": "199" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GT",
+    "name": "Guatemala",
+    "services": { "police": "110", "ambulance": "128", "fire": "122" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GN",
+    "name": "Guinea",
+    "services": { "police": "117", "ambulance": "18", "fire": "442020" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GY",
+    "name": "Guyana",
+    "services": { "police": "911", "ambulance": "913", "fire": "912" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "HT",
+    "name": "Haiti",
+    "services": { "police": "114", "ambulance": "116", "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "HN",
+    "name": "Honduras",
+    "services": { "police": "911", "ambulance": "195", "fire": "198" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "HU",
+    "name": "Hungary",
+    "services": {
+      "police": ["112", "107"],
+      "ambulance": ["112", "104"],
+      "fire": ["112", "105"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "IN",
+    "name": "India",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "108",
+      "fire": "101"
+    }
+  },
+  {
+    "iso2": "IR",
+    "name": "Iran",
+    "services": { "police": "110", "ambulance": "115", "fire": "125" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
@@ -39,35 +561,13 @@
       "fire": "112"
     }
   },
-
   {
-    "iso2": "FR",
-    "name": "France",
-    "services": {
-      "general": "112",
-      "police": "17",
-      "ambulance": "15",
-      "fire": "18"
-    }
-  },
-  {
-    "iso2": "DE",
-    "name": "Germany",
-    "services": {
-      "general": "112",
-      "police": "110",
-      "ambulance": "112",
-      "fire": "112"
-    }
-  },
-  {
-    "iso2": "ES",
-    "name": "Spain",
-    "services": {
-      "general": "112",
-      "police": "091",
-      "ambulance": "112",
-      "fire": "080"
+    "iso2": "IL",
+    "name": "Israel",
+    "services": { "police": "100", "ambulance": "101", "fire": "102" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
@@ -81,13 +581,213 @@
     }
   },
   {
-    "iso2": "PT",
-    "name": "Portugal",
+    "iso2": "CI",
+    "name": "Ivory Coast",
     "services": {
-      "general": "112",
-      "police": "112",
-      "ambulance": "112",
-      "fire": "112"
+      "police": ["110", "111", "170"],
+      "ambulance": "185",
+      "fire": "180"
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "JM",
+    "name": "Jamaica",
+    "services": { "police": "119", "ambulance": "110" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "JP",
+    "name": "Japan",
+    "services": {
+      "police": "110",
+      "ambulance": "119",
+      "fire": ["118", "7119", "9110", "8139112911110"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "XK",
+    "name": "Kosovo",
+    "services": { "police": "192", "ambulance": "194", "fire": "193" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "LA",
+    "name": "Laos",
+    "services": { "police": "191", "ambulance": "195", "fire": "190" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "LB",
+    "name": "Lebanon",
+    "services": { "police": ["999", "112"], "ambulance": "140", "fire": "175" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "LS",
+    "name": "Lesotho",
+    "services": { "police": "123", "ambulance": "121", "fire": "122" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "LI",
+    "name": "Liechtenstein",
+    "services": { "police": "117", "ambulance": "144", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MG",
+    "name": "Madagascar",
+    "services": { "police": "117", "ambulance": "124", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MW",
+    "name": "Malawi",
+    "services": { "police": "997", "ambulance": "998", "fire": "999" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "ML",
+    "name": "Mali",
+    "services": { "police": "17", "ambulance": "15", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MR",
+    "name": "Mauritania",
+    "services": { "police": "117", "ambulance": "101", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MU",
+    "name": "Mauritius",
+    "services": { "police": "112", "ambulance": "114", "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MX",
+    "name": "Mexico",
+    "services": {
+      "general": "911",
+      "police": "911",
+      "ambulance": "911",
+      "fire": "911"
+    }
+  },
+  {
+    "iso2": "MC",
+    "name": "Monaco",
+    "services": {
+      "police": "17",
+      "ambulance": ["112", "18"],
+      "fire": ["112", "18"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "ME",
+    "name": "Montenegro",
+    "services": {
+      "police": ["122", "112"],
+      "ambulance": ["124", "112"],
+      "fire": ["123", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MA",
+    "name": "Morocco",
+    "services": {
+      "police": "19",
+      "ambulance": "15",
+      "fire": ["177", "113", "114", "110", "160", "5050", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MZ",
+    "name": "Mozambique",
+    "services": { "police": "119", "ambulance": "117", "fire": "198" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NA",
+    "name": "Namibia",
+    "services": { "police": "10111" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NR",
+    "name": "Nauru",
+    "services": { "police": "110", "ambulance": "111", "fire": "112" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NP",
+    "name": "Nepal",
+    "services": { "police": "100", "ambulance": "102", "fire": "101" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
@@ -101,47 +801,6 @@
     }
   },
   {
-    "iso2": "BE",
-    "name": "Belgium",
-    "services": {
-      "general": "112",
-      "police": "101",
-      "ambulance": "112",
-      "fire": "112"
-    }
-  },
-  {
-    "iso2": "CH",
-    "name": "Switzerland",
-    "services": {
-      "general": "112",
-      "police": "117",
-      "ambulance": "144",
-      "fire": "118"
-    }
-  },
-  {
-    "iso2": "AT",
-    "name": "Austria",
-    "services": {
-      "general": "112",
-      "police": "133",
-      "ambulance": "144",
-      "fire": "122"
-    }
-  },
-
-  {
-    "iso2": "AU",
-    "name": "Australia",
-    "services": {
-      "general": "000",
-      "police": "000",
-      "ambulance": "000",
-      "fire": "000"
-    }
-  },
-  {
     "iso2": "NZ",
     "name": "New Zealand",
     "services": {
@@ -151,52 +810,395 @@
       "fire": "111"
     }
   },
-
   {
-    "iso2": "JP",
-    "name": "Japan",
+    "iso2": "NI",
+    "name": "Nicaragua",
+    "services": { "police": "118", "ambulance": "128", "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NE",
+    "name": "Niger",
+    "services": { "police": "17", "ambulance": "15", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NU",
+    "name": "Niue",
     "services": {
-      "general": "110",
+      "police": "6834333",
+      "ambulance": "6834202",
+      "fire": "6834133"
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MK",
+    "name": "North Macedonia",
+    "services": {
+      "police": ["192", "112"],
+      "ambulance": ["194", "112"],
+      "fire": ["193", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "NO",
+    "name": "Norway",
+    "services": { "police": "112", "ambulance": "113", "fire": "110" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "PK",
+    "name": "Pakistan",
+    "services": { "police": "15", "ambulance": "1151122", "fire": "16" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "PS",
+    "name": "Palestine",
+    "services": { "police": "100", "ambulance": "101", "fire": "102" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "PG",
+    "name": "Papua New Guinea",
+    "services": { "police": "112", "ambulance": "111", "fire": "110" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "PL",
+    "name": "Poland",
+    "services": {
+      "police": ["997", "112"],
+      "ambulance": ["999", "112"],
+      "fire": ["998", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "PT",
+    "name": "Portugal",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+  {
+    "iso2": "TW",
+    "name": "Republic of China (Taiwan)",
+    "services": {
       "police": "110",
       "ambulance": "119",
-      "fire": "119"
+      "fire": ["11201109119", "113", "118"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
     "iso2": "KR",
-    "name": "South Korea",
+    "name": "Republic of Korea",
     "services": {
-      "general": "112",
       "police": "112",
       "ambulance": "119",
-      "fire": "119"
+      "fire": ["110", "111", "113", "127", "182", "1330"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
-
   {
-    "iso2": "CN",
-    "name": "China",
+    "iso2": "RU",
+    "name": "Russia",
     "services": {
-      "general": "110",
-      "police": "110",
-      "ambulance": "120",
-      "fire": "119"
+      "police": ["102", "112"],
+      "ambulance": ["103", "112"],
+      "fire": ["101", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
-    "iso2": "IN",
-    "name": "India",
+    "iso2": "RW",
+    "name": "Rwanda",
+    "services": { "police": "112", "ambulance": "912", "fire": "112" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "BL",
+    "name": "Saint Barthélemy",
+    "services": { "police": "17", "ambulance": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "MF",
+    "name": "Saint Martin",
+    "services": { "police": "17", "ambulance": "15", "fire": "18" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SM",
+    "name": "San Marino",
+    "services": { "police": "113", "ambulance": "118", "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SN",
+    "name": "Senegal",
+    "services": { "police": "17", "ambulance": "18", "fire": "1515" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "RS",
+    "name": "Serbia",
+    "services": { "police": ["192", "112"], "ambulance": "194", "fire": "193" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SL",
+    "name": "Sierra Leone",
+    "services": { "police": "019", "ambulance": "999" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SG",
+    "name": "Singapore",
+    "services": {
+      "police": "999",
+      "ambulance": "995",
+      "fire": ["112", "911", "1777", "18002550000", "65470000"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SX",
+    "name": "Sint Maarten",
+    "services": { "police": "911", "ambulance": "912", "fire": "919" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SK",
+    "name": "Slovakia",
+    "services": { "police": "158", "ambulance": "155", "fire": "150" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SO",
+    "name": "Somalia",
+    "services": { "police": "888", "ambulance": "999", "fire": "555" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "ZA",
+    "name": "South Africa",
+    "services": {
+      "police": "10111",
+      "ambulance": "10177",
+      "fire": ["107", "112"]
+    },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "ES",
+    "name": "Spain",
     "services": {
       "general": "112",
-      "police": "112",
-      "ambulance": "108",
-      "fire": "101"
+      "police": "091",
+      "ambulance": "112",
+      "fire": "080"
     }
   },
-
   {
-    "iso2": "MX",
-    "name": "Mexico",
+    "iso2": "LK",
+    "name": "Sri Lanka",
+    "services": { "police": "119", "ambulance": "110", "fire": "112691111" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "CH",
+    "name": "Switzerland",
+    "services": { "police": "117", "ambulance": "144", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "SY",
+    "name": "Syria",
+    "services": { "police": "112", "ambulance": "110", "fire": "113" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TZ",
+    "name": "Tanzania",
+    "services": { "police": "112", "ambulance": "114", "fire": "115" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TH",
+    "name": "Thailand",
+    "services": { "police": "191", "ambulance": "1669", "fire": "199" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TG",
+    "name": "Togo",
+    "services": { "police": "117", "ambulance": "8200", "fire": "118" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TK",
+    "name": "Tokelau",
+    "services": { "police": "6902116", "ambulance": "6902112" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TT",
+    "name": "Trinidad and Tobago",
+    "services": { "police": ["999", "911"], "ambulance": "811", "fire": "990" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TN",
+    "name": "Tunisia",
+    "services": { "police": "197", "ambulance": "190", "fire": "198" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "TM",
+    "name": "Turkmenistan",
+    "services": { "police": "02", "ambulance": "03", "fire": "01" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "UA",
+    "name": "Ukraine",
+    "services": { "police": "102", "ambulance": "103", "fire": "101" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "AE",
+    "name": "United Arab Emirates",
+    "services": { "police": "999", "ambulance": "998", "fire": "997" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "GB",
+    "name": "United Kingdom",
+    "services": {
+      "general": "999",
+      "police": "999",
+      "ambulance": "999",
+      "fire": "999"
+    }
+  },
+  {
+    "iso2": "US",
+    "name": "United States",
     "services": {
       "general": "911",
       "police": "911",
@@ -205,44 +1207,48 @@
     }
   },
   {
-    "iso2": "BR",
-    "name": "Brazil",
-    "services": {
-      "general": "190",
-      "police": "190",
-      "ambulance": "192",
-      "fire": "193"
+    "iso2": "UG",
+    "name": "Uganda",
+    "services": { "police": "112", "ambulance": "911", "fire": "112" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
-    "iso2": "AR",
-    "name": "Argentina",
-    "services": {
-      "general": "911",
-      "police": "911",
-      "ambulance": "107",
-      "fire": "100"
-    }
-  },
-
-  {
-    "iso2": "ZA",
-    "name": "South Africa",
-    "services": {
-      "general": "112",
-      "police": "10111",
-      "ambulance": "10177",
-      "fire": "10177"
+    "iso2": "UZ",
+    "name": "Uzbekistan",
+    "services": { "police": "102", "ambulance": "103", "fire": "101" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   },
   {
-    "iso2": "AE",
-    "name": "United Arab Emirates",
-    "services": {
-      "general": "999",
-      "police": "999",
-      "ambulance": "998",
-      "fire": "997"
+    "iso2": "VU",
+    "name": "Vanuatu",
+    "services": { "police": "111", "ambulance": "112", "fire": "113" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "VN",
+    "name": "Vietnam",
+    "services": { "police": "113", "ambulance": "115", "fire": "114" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
+    }
+  },
+  {
+    "iso2": "YE",
+    "name": "Yemen",
+    "services": { "police": "194", "ambulance": "191" },
+    "metadata": {
+      "source": "Wikipedia - List of emergency telephone numbers",
+      "lastVerified": "2025-12"
     }
   }
 ]

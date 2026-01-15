@@ -3,7 +3,7 @@ import "./App.css";
 
 const STORAGE_KEY = "ec_selected_country_iso2";
 
-function CallButton({ label, number }) {
+function SingleCallButton({ label, number, badge }) {
   const disabled = !number;
 
   function handleClick(e) {
@@ -24,7 +24,14 @@ function CallButton({ label, number }) {
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <div className="text-lg font-semibold">{label}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-lg font-semibold">{label}</div>
+            {badge && (
+              <span className="text-xs font-medium rounded-full border px-2 py-0.5 opacity-80">
+                {badge}
+              </span>
+            )}
+          </div>
           <div className="text-2xl font-bold tracking-tight">
             {number || "—"}
           </div>
@@ -35,6 +42,27 @@ function CallButton({ label, number }) {
       </div>
     </a>
   );
+}
+
+// Supports number as string OR array of strings
+function CallButton({ label, number }) {
+  if (Array.isArray(number)) {
+    // Render each as its own distinct button
+    return (
+      <div className="space-y-2">
+        {number.map((n, idx) => (
+          <SingleCallButton
+            key={`${label}-${n}-${idx}`}
+            label={label}
+            number={n}
+            badge={idx === 0 ? "Primary" : `Alt ${idx}`}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return <SingleCallButton label={label} number={number} />;
 }
 
 export default function App() {
