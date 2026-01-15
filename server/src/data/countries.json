@@ -1,0 +1,72 @@
+[
+  {
+    "iso2": "GB",
+    "name": "United Kingdom",
+    "services": {
+      "general": "999",
+      "police": "999",
+      "ambulance": "999",
+      "fire": "999"
+    }
+  },
+  {
+    "iso2": "US",
+    "name": "United States",
+    "services": {
+      "general": "911",
+      "police": "911",
+      "ambulance": "911",
+      "fire": "911"
+    }
+  },
+  {
+    "iso2": "CA",
+    "name": "Canada",
+    "services": {
+      "general": "911",
+      "police": "911",
+      "ambulance": "911",
+      "fire": "911"
+    }
+  },
+  {
+    "iso2": "FR",
+    "name": "France",
+    "services": {
+      "general": "112",
+      "police": "17",
+      "ambulance": "15",
+      "fire": "18"
+    }
+  },
+  {
+    "iso2": "DE",
+    "name": "Germany",
+    "services": {
+      "general": "112",
+      "police": "110",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+  {
+    "iso2": "ES",
+    "name": "Spain",
+    "services": {
+      "general": "112",
+      "police": "091",
+      "ambulance": "112",
+      "fire": "080"
+    }
+  },
+  {
+    "iso2": "IT",
+    "name": "Italy",
+    "services": {
+      "general": "112",
+      "police": "113",
+      "ambulance": "118",
+      "fire": "115"
+    }
+  }
+]

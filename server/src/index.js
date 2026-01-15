@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import countries from "./data/countries.json" with { type: "json" };
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,6 +13,26 @@ app.use(express.json());
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is healthy" });
+});
+
+// List all countries (minimal fields for picker)
+app.get("/api/countries", (req, res) => {
+  const list = countries
+    .map((c) => ({ iso2: c.iso2, name: c.name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  res.json(list);
+});
+
+// Fetch one country by ISO2
+app.get("/api/countries/:iso2", (req, res) => {
+  const iso2 = String(req.params.iso2 || "").toUpperCase();
+  const country = countries.find((c) => c.iso2 === iso2);
+
+  if (!country) {
+    return res.status(404).json({ error: "Country not found" });
+  }
+
+  res.json(country);
 });
 
 const clientDistPath = path.resolve(__dirname, "../../client/dist");

@@ -51,10 +51,16 @@ It intentionally avoids technical jargon.
 
 ### MVP Core
 
-- [ ] Add a small starter dataset of emergency numbers (a few countries)
-- [ ] Create API endpoints to retrieve emergency numbers
-- [ ] Build the “panic screen” UI (big buttons: police/ambulance/fire)
-- [ ] Add country picker + remember selection
+- [x] Add a small starter dataset of emergency numbers (a few countries)
+- [x] Create API endpoints to retrieve emergency numbers
+- [x] Build the “panic screen” UI (big buttons: police/ambulance/fire)
+- [x] Add country picker + remember selection
+
+### MVP Polish
+
+- [ ] Add a “confirm before calling” toggle (optional safety)
+- [ ] Add search in country picker (helps once country list grows)
+- [ ] Improve error state when API is unavailable
 
 ### Reliability (after core works)
 
