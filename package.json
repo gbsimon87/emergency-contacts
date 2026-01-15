@@ -1,0 +1,17 @@
+{
+  "name": "emergency-contacts",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm -w client run dev",
+    "dev:full": "concurrently -n client,server \"npm -w client run dev\" \"npm -w server run dev\"",
+    "build": "npm -w client run build",
+    "start": "npm -w server start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
