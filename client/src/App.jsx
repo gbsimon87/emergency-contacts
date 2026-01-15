@@ -17,26 +17,47 @@ function SingleCallButton({ label, number, badge }) {
       href={number ? `tel:${number}` : undefined}
       onClick={handleClick}
       className={[
-        "block w-full rounded-2xl border p-4 text-left",
-        "active:scale-[0.99] transition",
-        disabled ? "opacity-50 pointer-events-none" : "hover:bg-black/5",
+        // card surface
+        "group block w-full rounded-2xl bg-white",
+        "border border-slate-200/70 shadow-sm",
+        "p-4 sm:p-5",
+        // interaction
+        "transition will-change-transform",
+        disabled
+          ? "opacity-50 pointer-events-none"
+          : "hover:shadow-md hover:-translate-y-[1px] active:translate-y-0 active:shadow-sm",
+        // focus
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50",
       ].join(" ")}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <div className="text-lg font-semibold">{label}</div>
+            <div className="text-sm font-semibold text-slate-900">{label}</div>
             {badge && (
-              <span className="text-xs font-medium rounded-full border px-2 py-0.5 opacity-80">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700">
                 {badge}
               </span>
             )}
           </div>
-          <div className="text-2xl font-bold tracking-tight">
+
+          <div className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
             {number || "—"}
           </div>
+
+          <div className="mt-1 text-xs text-slate-500">
+            Tap to start a phone call
+          </div>
         </div>
-        <div className="text-sm font-medium rounded-full border px-3 py-1">
+
+        <div
+          className={[
+            "shrink-0 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold",
+            disabled
+              ? "border border-slate-200 text-slate-500"
+              : "bg-slate-900 text-white shadow-sm group-hover:shadow",
+          ].join(" ")}
+        >
           Call
         </div>
       </div>
@@ -47,9 +68,8 @@ function SingleCallButton({ label, number, badge }) {
 // Supports number as string OR array of strings
 function CallButton({ label, number }) {
   if (Array.isArray(number)) {
-    // Render each as its own distinct button
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {number.map((n, idx) => (
           <SingleCallButton
             key={`${label}-${n}-${idx}`}
@@ -106,29 +126,22 @@ export default function App() {
     }
   }
 
-  // Load country list for picker
   useEffect(() => {
     fetchCountries();
   }, []);
 
-  // Load selected country details
   useEffect(() => {
     fetchCountryDetails(selectedIso2);
   }, [selectedIso2]);
 
   const filteredCountries = useMemo(() => {
     if (!search.trim()) return countries;
-
     const q = search.toLowerCase();
     return countries.filter((c) => c.name.toLowerCase().includes(q));
   }, [countries, search]);
 
-  // Keep selectedIso2 in sync with the filtered list.
-  // If the selected country disappears due to search filtering,
-  // automatically pick the first match so numbers update.
   useEffect(() => {
     if (!filteredCountries.length) return;
-
     const stillVisible = filteredCountries.some((c) => c.iso2 === selectedIso2);
     if (!stillVisible && search.trim()) {
       setSelectedIso2(filteredCountries[0].iso2);
@@ -141,88 +154,150 @@ export default function App() {
   );
 
   return (
-    <main className="min-h-screen p-4 sm:p-6">
-      <div className="mx-auto max-w-lg space-y-4">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Emergency Contacts
-          </h1>
-          <p className="text-sm opacity-80">
-            Select a country to see emergency numbers. Tap to call.
-          </p>
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+        {/* Top header bar */}
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              Emergency Contacts
+            </h1>
+            <p className="text-sm text-slate-600">
+              Select a country to see emergency numbers. Tap to call.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-600">Selected</span>
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold">
+              {selectedCountry?.name || "—"}
+            </span>
+          </div>
         </header>
 
-        <section className="rounded-2xl border p-4 space-y-3">
-          <label className="block text-sm font-medium">Country</label>
+        {/* Main content layout */}
+        <div className="mt-6 grid gap-4 md:grid-cols-[360px,1fr] md:items-start">
+          {/* Picker card */}
+          <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold">Country</div>
+                <div className="mt-1 text-xs text-slate-500">
+                  Search, then choose from the list
+                </div>
+              </div>
 
-          <input
-            type="text"
-            placeholder="Search country…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border px-3 py-2 text-sm"
-          />
-
-          <select
-            value={selectedIso2}
-            onChange={(e) => setSelectedIso2(e.target.value)}
-            className="w-full rounded-xl border px-3 py-2"
-          >
-            {filteredCountries.map((c) => (
-              <option key={c.iso2} value={c.iso2}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          {filteredCountries.length === 0 && (
-            <p className="text-sm opacity-70">
-              No countries match your search.
-            </p>
-          )}
-
-          {loadingCountry && (
-            <p className="text-sm opacity-70">Loading numbers…</p>
-          )}
-
-          {selectedCountry && (
-            <p className="text-sm opacity-70">
-              Showing numbers for{" "}
-              <span className="font-medium">{selectedCountry.name}</span>
-            </p>
-          )}
-
-          {error && (
-            <div className="rounded-xl border p-3 space-y-2">
-              <p className="text-sm text-red-600">{error}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  fetchCountries();
-                  fetchCountryDetails(selectedIso2);
-                }}
-                className="w-full rounded-xl border px-3 py-2 text-sm font-medium hover:bg-black/5"
-              >
-                Retry
-              </button>
+              {loadingCountry && (
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700">
+                  Loading…
+                </span>
+              )}
             </div>
-          )}
-        </section>
 
-        <section className="space-y-3">
-          <CallButton label="General Emergency" number={services.general} />
-          <CallButton label="Police" number={services.police} />
-          <CallButton label="Ambulance" number={services.ambulance} />
-          <CallButton label="Fire" number={services.fire} />
-        </section>
+            <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-600">
+                  Search
+                </label>
+                <input
+                  type="text"
+                  placeholder="Search country…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className={[
+                    "w-full rounded-2xl border border-slate-200 bg-slate-50",
+                    "px-3 py-2.5 text-sm",
+                    "placeholder:text-slate-400",
+                    "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
+                  ].join(" ")}
+                />
+              </div>
 
-        <footer className="rounded-2xl border p-4 text-xs opacity-80">
-          <p className="font-medium">Disclaimer</p>
-          <p>
-            Emergency numbers can vary by region and may change. If you are
-            able, confirm you selected the correct country before calling.
-          </p>
-        </footer>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-600">
+                  Country list
+                </label>
+                <select
+                  value={selectedIso2}
+                  onChange={(e) => setSelectedIso2(e.target.value)}
+                  className={[
+                    "w-full rounded-2xl border border-slate-200 bg-white",
+                    "px-3 py-2.5 text-sm",
+                    "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
+                  ].join(" ")}
+                >
+                  {filteredCountries.map((c) => (
+                    <option key={c.iso2} value={c.iso2}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {filteredCountries.length === 0 && (
+                <p className="text-sm text-slate-600">
+                  No countries match your search.
+                </p>
+              )}
+
+              {selectedCountry && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                  Showing numbers for{" "}
+                  <span className="font-semibold">{selectedCountry.name}</span>
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-2xl border border-red-200 bg-white p-3 space-y-2">
+                  <p className="text-sm text-red-700">{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      fetchCountries();
+                      fetchCountryDetails(selectedIso2);
+                    }}
+                    className={[
+                      "w-full rounded-2xl px-3 py-2.5 text-sm font-semibold",
+                      "border border-slate-200 bg-white",
+                      "hover:bg-slate-50 active:scale-[0.99] transition",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                    ].join(" ")}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Calls + disclaimer */}
+          <div className="space-y-4">
+            <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 className="text-sm font-semibold">Emergency services</h2>
+                <p className="text-xs text-slate-500">Tap a card to call</p>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <CallButton
+                  label="General Emergency"
+                  number={services.general}
+                />
+                <CallButton label="Police" number={services.police} />
+                <CallButton label="Ambulance" number={services.ambulance} />
+                <CallButton label="Fire" number={services.fire} />
+              </div>
+            </section>
+
+            <footer className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+              <p className="text-sm font-semibold">Disclaimer</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Emergency numbers can vary by region and may change. If you are
+                able, confirm you selected the correct country before calling.
+              </p>
+            </footer>
+          </div>
+        </div>
       </div>
     </main>
   );
