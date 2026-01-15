@@ -1,15 +1,5 @@
 [
   {
-    "iso2": "GB",
-    "name": "United Kingdom",
-    "services": {
-      "general": "999",
-      "police": "999",
-      "ambulance": "999",
-      "fire": "999"
-    }
-  },
-  {
     "iso2": "US",
     "name": "United States",
     "services": {
@@ -29,6 +19,27 @@
       "fire": "911"
     }
   },
+  {
+    "iso2": "GB",
+    "name": "United Kingdom",
+    "services": {
+      "general": "999",
+      "police": "999",
+      "ambulance": "999",
+      "fire": "999"
+    }
+  },
+  {
+    "iso2": "IE",
+    "name": "Ireland",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+
   {
     "iso2": "FR",
     "name": "France",
@@ -67,6 +78,171 @@
       "police": "113",
       "ambulance": "118",
       "fire": "115"
+    }
+  },
+  {
+    "iso2": "PT",
+    "name": "Portugal",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+  {
+    "iso2": "NL",
+    "name": "Netherlands",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+  {
+    "iso2": "BE",
+    "name": "Belgium",
+    "services": {
+      "general": "112",
+      "police": "101",
+      "ambulance": "112",
+      "fire": "112"
+    }
+  },
+  {
+    "iso2": "CH",
+    "name": "Switzerland",
+    "services": {
+      "general": "112",
+      "police": "117",
+      "ambulance": "144",
+      "fire": "118"
+    }
+  },
+  {
+    "iso2": "AT",
+    "name": "Austria",
+    "services": {
+      "general": "112",
+      "police": "133",
+      "ambulance": "144",
+      "fire": "122"
+    }
+  },
+
+  {
+    "iso2": "AU",
+    "name": "Australia",
+    "services": {
+      "general": "000",
+      "police": "000",
+      "ambulance": "000",
+      "fire": "000"
+    }
+  },
+  {
+    "iso2": "NZ",
+    "name": "New Zealand",
+    "services": {
+      "general": "111",
+      "police": "111",
+      "ambulance": "111",
+      "fire": "111"
+    }
+  },
+
+  {
+    "iso2": "JP",
+    "name": "Japan",
+    "services": {
+      "general": "110",
+      "police": "110",
+      "ambulance": "119",
+      "fire": "119"
+    }
+  },
+  {
+    "iso2": "KR",
+    "name": "South Korea",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "119",
+      "fire": "119"
+    }
+  },
+
+  {
+    "iso2": "CN",
+    "name": "China",
+    "services": {
+      "general": "110",
+      "police": "110",
+      "ambulance": "120",
+      "fire": "119"
+    }
+  },
+  {
+    "iso2": "IN",
+    "name": "India",
+    "services": {
+      "general": "112",
+      "police": "112",
+      "ambulance": "108",
+      "fire": "101"
+    }
+  },
+
+  {
+    "iso2": "MX",
+    "name": "Mexico",
+    "services": {
+      "general": "911",
+      "police": "911",
+      "ambulance": "911",
+      "fire": "911"
+    }
+  },
+  {
+    "iso2": "BR",
+    "name": "Brazil",
+    "services": {
+      "general": "190",
+      "police": "190",
+      "ambulance": "192",
+      "fire": "193"
+    }
+  },
+  {
+    "iso2": "AR",
+    "name": "Argentina",
+    "services": {
+      "general": "911",
+      "police": "911",
+      "ambulance": "107",
+      "fire": "100"
+    }
+  },
+
+  {
+    "iso2": "ZA",
+    "name": "South Africa",
+    "services": {
+      "general": "112",
+      "police": "10111",
+      "ambulance": "10177",
+      "fire": "10177"
+    }
+  },
+  {
+    "iso2": "AE",
+    "name": "United Arab Emirates",
+    "services": {
+      "general": "999",
+      "police": "999",
+      "ambulance": "998",
+      "fire": "997"
     }
   }
 ]
