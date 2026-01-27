@@ -115,8 +115,8 @@ Travelers often need to share information quickly with others.
 
 ### 4. Data Guardrails
 
-- [ ] Validate incoming country data (`iso2`, services shape)
-- [ ] Fail gracefully on malformed or incomplete data
+- [x] Validate incoming country data (`iso2`, services shape)
+- [x] Fail gracefully on malformed or incomplete data
 
 **Why this matters:**  
 Prevents silent failures as the dataset grows.
