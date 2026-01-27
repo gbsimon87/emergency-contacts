@@ -11,8 +11,8 @@ The focus is **speed, clarity, and reliability**, not advanced features.
 This document acts as a **living checklist**:
 
 - What works today
-- What we’re building next
-- What comes later
+- What we’ve intentionally completed
+- What comes next — in priority order
 
 It intentionally avoids technical jargon.
 
@@ -37,6 +37,8 @@ It intentionally avoids technical jargon.
 - [x] Last selected country is remembered
 - [x] Supports multiple emergency numbers per service (distinct call buttons)
 - [x] Confirm-before-call protection to avoid accidental dialing
+- [x] Copy all emergency numbers
+- [x] Share emergency numbers for the selected country
 
 ### Backend (Server)
 
@@ -53,7 +55,7 @@ It intentionally avoids technical jargon.
 - [x] Services labeled clearly (general / police / ambulance / fire)
 - [x] Supports multiple numbers per service (array + single value)
 - [x] Metadata added to country data
-  - [x] Data source
+  - [x] Data source (internal)
   - [x] Last verified date
 
 ### Reliability
@@ -61,6 +63,7 @@ It intentionally avoids technical jargon.
 - [x] Graceful handling of network/API failures
 - [x] Clear error messaging with retry option
 - [x] Last-known emergency numbers remain visible during failures
+- [x] Server-side validation and normalization of country data
 
 ### Deployment & Source Control
 
@@ -72,111 +75,111 @@ It intentionally avoids technical jargon.
 
 ---
 
-## 🟡 Phase 0 MVP — Honest Prioritisation (Checklist)
+## 🟢 Phase 0 MVP — Status: **Complete**
 
-This is the **authoritative Phase 0 priority list**.  
-Items are ordered by **real-world user impact during emergencies**.
+### What Phase 0 Delivered (Plain English)
 
----
-
-### 1. Visual Clarity & Reassurance Under Stress (Highest Priority)
-
-- [x] Make the selected country impossible to miss
-  - Prominent country display near call actions
-- [x] Calm, human wording for disclaimers
-- [x] Reassuring loading messages
-- [x] Reduce visual noise on call cards (numbers dominate)
-
-**Why this matters:**  
-In an emergency, users need instant reassurance they’re looking at the right information.
-
----
-
-### 2. Trust Signals (Subtle, Non-Intrusive)
-
-- [x] Store verification metadata in data model
-- [x] Display “last verified” date in a subtle way
-- [x] Optional source attribution (small, secondary text)
-
-**Why this matters:**  
-Users hesitate if they’re unsure whether numbers are current or trustworthy.
-
----
-
-### 3. Quick Utility Actions
-
-- [x] One-tap “Copy all numbers”
-- [x] Share emergency numbers for the selected country
-
-**Why this matters:**  
-Travelers often need to share information quickly with others.
-
----
-
-### 4. Data Guardrails
-
-- [x] Validate incoming country data (`iso2`, services shape)
-- [x] Fail gracefully on malformed or incomplete data
-
-**Why this matters:**  
-Prevents silent failures as the dataset grows.
-
----
-
-### 5. Incremental Data Expansion
-
-- [ ] Continue expanding dataset country-by-country
-- [ ] Prioritize:
-  - High travel volume countries
-  - Regions with non-obvious emergency numbers
-
-**Why this matters:**  
-Coverage increases usefulness without adding UI complexity.
-
----
-
-## 🎯 Phase 0 MVP Goal (Plain English)
-
-> A user should be able to:
+> A real user can:
 >
-> 1. Select a country
-> 2. Immediately see the correct emergency phone numbers
-> 3. Tap a number and call it
+> 1. Open the app on any device
+> 2. Select a country (even under poor connectivity)
+> 3. Immediately see accurate emergency phone numbers
+> 4. Call, copy, or share those numbers in under 30 seconds
 >
-> No accounts, no clutter, no distractions.
+> With no accounts, no setup, and no distractions.
+
+Phase 0 is intentionally **feature-light but reliability-heavy**.  
+The app does one thing, and it does it well — even when conditions are bad.
 
 ---
 
-## 🔜 After Phase 0 (Explicitly Not Yet)
+## 🧭 Post–Phase 0 Roadmap (Ordered by Real User Value)
 
-These are intentionally postponed until Phase 0 is clearly successful:
+These items are **not commitments**, but a prioritised guide for future work.
+They are ordered by _impact in real emergencies_, not by technical interest.
 
-- [ ] Automatic location detection
-- [ ] Offline-first support
-- [ ] Nearby hospitals / embassies
-- [ ] Medical profiles
-- [ ] User accounts
+---
+
+### 1. Offline-First Support (Highest Value)
+
+**Goal:** The app should still work when connectivity disappears.
+
+- [ ] Cache last-used country and emergency numbers for offline use
+- [ ] Clear offline indicator (“Using last saved data”)
+- [ ] No background sync or complexity — read-only cache
+
+**Why this matters:**  
+Emergencies often happen where connectivity is weak or unavailable.
+
+---
+
+### 2. Automatic Location Detection (Optional, Fallback-Based)
+
+**Goal:** Reduce friction when the user is disoriented.
+
+- [ ] Attempt to detect country automatically
+- [ ] Always allow manual override
+- [ ] Never block usage on location permission
+
+**Why this matters:**  
+Helpful when it works, dangerous if it’s wrong — must be conservative.
+
+---
+
+### 3. “What to Say” Micro-Guidance
+
+**Goal:** Help users communicate clearly under stress.
+
+- [ ] Short checklist per service:
+  - “State emergency”
+  - “Give location”
+  - “Answer questions”
+- [ ] Optional local-language phrases (very limited)
+
+**Why this matters:**  
+Knowing _what to say_ can be as important as knowing _who to call_.
+
+---
+
+### 4. Nearby Emergency Facilities (Read-Only)
+
+**Goal:** Provide secondary help options.
+
+- [ ] Nearby hospitals
+- [ ] Embassies / consulates
+- [ ] Links only — no navigation logic
+
+**Why this matters:**  
+Useful when calling isn’t enough or not possible.
+
+---
+
+### 5. First-Aid Micro-Cards (Strictly Secondary)
+
+**Goal:** Immediate guidance while help is on the way.
+
+- [ ] Bleeding
+- [ ] Choking
+- [ ] CPR
+- [ ] Clear “Call first” vs “Act first” guidance
+
+**Why this matters:**  
+High value, but only after calling is addressed.
+
+---
+
+### 6. Crowd Contributions (Long-Term, High Risk)
+
 - [ ] Crowdsourced edits
-- [ ] Advanced UI polish
-- [ ] “What to say” micro-script (local phrasing + address tips)
-- [ ] First-aid micro-articles (bleeding, choking, CPR)
-- [ ] Share/copy flows for group travel
+- [ ] Verification workflows
+- [ ] Moderation and trust models
+
+**Why this matters:**  
+Potentially powerful, but dangerous if rushed.
 
 ---
 
-## 🚀 Definition of “MVP Complete”
-
-Phase 0 is complete when:
-
-- A real user can open the app
-- Pick a country
-- See accurate emergency numbers
-- Call them in under 30 seconds
-- Even with poor connectivity or momentary failures
-
----
-
-## Guiding Principle
+## 🚀 Guiding Principle (Always)
 
 > In an emergency, fewer features save more time.
 
