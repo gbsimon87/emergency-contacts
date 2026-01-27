@@ -90,6 +90,7 @@ export default function App() {
   const [loadingCountry, setLoadingCountry] = useState(false);
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [error, setError] = useState("");
 
   async function fetchCountries() {
@@ -155,6 +156,20 @@ export default function App() {
     return Array.isArray(value) ? value.join(" / ") : value;
   }
 
+  function buildShareText() {
+    if (!selectedCountry) return "";
+
+    const lines = [
+      `Emergency numbers — ${selectedCountry.name}`,
+      `General: ${formatServiceValue(services.general)}`,
+      `Police: ${formatServiceValue(services.police)}`,
+      `Ambulance: ${formatServiceValue(services.ambulance)}`,
+      `Fire: ${formatServiceValue(services.fire)}`,
+    ];
+
+    return lines.join("\n");
+  }
+
   async function copyAllNumbers() {
     if (!selectedCountry) return;
 
@@ -174,6 +189,32 @@ export default function App() {
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
       // Fallback (older browsers)
+      window.prompt("Copy the emergency numbers:", text);
+    }
+  }
+
+  async function shareNumbers() {
+    if (!selectedCountry) return;
+
+    const text = buildShareText();
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Emergency numbers — ${selectedCountry.name}`,
+          text,
+        });
+        setShared(true);
+        window.setTimeout(() => setShared(false), 1500);
+        return;
+      }
+
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(text);
+      setShared(true);
+      window.setTimeout(() => setShared(false), 1500);
+    } catch {
+      // Last-resort fallback
       window.prompt("Copy the emergency numbers:", text);
     }
   }
@@ -338,7 +379,20 @@ export default function App() {
                     {copied ? "Copied" : "Copy all"}
                   </button>
 
-                  <p className="text-xs text-slate-500">Tap a card to call</p>
+                  <button
+                    type="button"
+                    onClick={shareNumbers}
+                    disabled={!selectedCountry}
+                    className={[
+                      "rounded-2xl px-3 py-1.5 text-xs font-semibold",
+                      "border border-slate-200 bg-white",
+                      "hover:bg-slate-50 active:scale-[0.99] transition",
+                      "disabled:opacity-50 disabled:pointer-events-none",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                    ].join(" ")}
+                  >
+                    {shared ? "Shared" : "Share"}
+                  </button>
                 </div>
               </div>
 

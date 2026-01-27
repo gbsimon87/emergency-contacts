@@ -105,8 +105,8 @@ Users hesitate if they’re unsure whether numbers are current or trustworthy.
 
 ### 3. Quick Utility Actions
 
-- [ ] One-tap “Copy all numbers”
-- [ ] Share emergency numbers for the selected country
+- [x] One-tap “Copy all numbers”
+- [x] Share emergency numbers for the selected country
 
 **Why this matters:**  
 Travelers often need to share information quickly with others.
