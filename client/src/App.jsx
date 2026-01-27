@@ -41,12 +41,8 @@ function SingleCallButton({ label, number, badge }) {
             )}
           </div>
 
-          <div className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+          <div className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
             {number || "—"}
-          </div>
-
-          <div className="mt-1 text-xs text-slate-500">
-            Tap to start a phone call
           </div>
         </div>
 
@@ -69,7 +65,7 @@ function SingleCallButton({ label, number, badge }) {
 function CallButton({ label, number }) {
   if (Array.isArray(number)) {
     return (
-      <div className="space-y-3">
+      <div className="grid gap-3">
         {number.map((n, idx) => (
           <SingleCallButton
             key={`${label}-${n}-${idx}`}
@@ -88,7 +84,7 @@ function CallButton({ label, number }) {
 export default function App() {
   const [countries, setCountries] = useState([]);
   const [selectedIso2, setSelectedIso2] = useState(
-    () => localStorage.getItem(STORAGE_KEY) || "GB"
+    () => localStorage.getItem(STORAGE_KEY) || "GB",
   );
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loadingCountry, setLoadingCountry] = useState(false);
@@ -118,7 +114,7 @@ export default function App() {
       localStorage.setItem(STORAGE_KEY, iso2);
     } catch {
       setError(
-        "Can't load updated numbers right now. Showing last available info."
+        "Can't load updated numbers right now. Showing last available info.",
       );
       // Keep selectedCountry as-is (last known numbers)
     } finally {
@@ -150,7 +146,7 @@ export default function App() {
 
   const services = useMemo(
     () => selectedCountry?.services || {},
-    [selectedCountry]
+    [selectedCountry],
   );
 
   return (
@@ -166,13 +162,6 @@ export default function App() {
               Select a country to see emergency numbers. Tap to call.
             </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-600">Selected</span>
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold">
-              {selectedCountry?.name || "—"}
-            </span>
-          </div>
         </header>
 
         {/* Main content layout */}
@@ -183,14 +172,14 @@ export default function App() {
               <div>
                 <div className="text-sm font-semibold">Country</div>
                 <div className="mt-1 text-xs text-slate-500">
-                  Search, then choose from the list
+                  Search, then choose from the list.
                 </div>
               </div>
 
               {loadingCountry && (
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700">
-                  Loading…
-                </span>
+                <p className="text-sm opacity-70">
+                  Fetching local emergency numbers…
+                </p>
               )}
             </div>
 
@@ -241,9 +230,13 @@ export default function App() {
               )}
 
               {selectedCountry && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                  Showing numbers for{" "}
-                  <span className="font-semibold">{selectedCountry.name}</span>
+                <div className="rounded-2xl border p-4">
+                  <div className="text-xs uppercase tracking-wide opacity-70">
+                    Emergency numbers for
+                  </div>
+                  <div className="text-xl font-bold tracking-tight">
+                    {selectedCountry.name}
+                  </div>
                 </div>
               )}
 
@@ -274,7 +267,22 @@ export default function App() {
           <div className="space-y-4">
             <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
               <div className="flex items-baseline justify-between gap-3">
-                <h2 className="text-sm font-semibold">Emergency services</h2>
+                <div className="min-w-0">
+                  <h2 className="text-sm font-semibold">Emergency services</h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {selectedCountry ? (
+                      <>
+                        Current country:{" "}
+                        <span className="font-semibold text-slate-700">
+                          {selectedCountry.name}
+                        </span>
+                      </>
+                    ) : (
+                      "Select a country to view numbers"
+                    )}
+                  </p>
+                </div>
+
                 <p className="text-xs text-slate-500">Tap a card to call</p>
               </div>
 
@@ -292,8 +300,8 @@ export default function App() {
             <footer className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
               <p className="text-sm font-semibold">Disclaimer</p>
               <p className="mt-1 text-sm text-slate-600">
-                Emergency numbers can vary by region and may change. If you are
-                able, confirm you selected the correct country before calling.
+                If it's safe to do so, double-check you selected the correct
+                country before calling.
               </p>
             </footer>
           </div>

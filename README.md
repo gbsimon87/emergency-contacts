@@ -35,6 +35,8 @@ It intentionally avoids technical jargon.
 - [x] Country picker works
 - [x] Country search works
 - [x] Last selected country is remembered
+- [x] Supports multiple emergency numbers per service (distinct call buttons)
+- [x] Confirm-before-call protection to avoid accidental dialing
 
 ### Backend (Server)
 
@@ -49,6 +51,10 @@ It intentionally avoids technical jargon.
 
 - [x] Expanded dataset covering major global travel destinations
 - [x] Services labeled clearly (general / police / ambulance / fire)
+- [x] Supports multiple numbers per service (array + single value)
+- [x] Metadata added to country data
+  - [x] Data source
+  - [x] Last verified date
 
 ### Reliability
 
@@ -66,42 +72,58 @@ It intentionally avoids technical jargon.
 
 ---
 
-## 🟡 Phase 0 MVP — Highest-Value Next Steps
+## 🟡 Phase 0 MVP — Honest Prioritisation (Checklist)
 
-These are ordered by **user trust and speed under stress**, not technical interest.
+This is the **authoritative Phase 0 priority list**.  
+Items are ordered by **real-world user impact during emergencies**.
 
 ---
 
-### 1. Trust & Credibility (Top Priority)
+### 1. Visual Clarity & Reassurance Under Stress (Highest Priority)
 
-**Goal:** Users should trust the numbers instantly.
-
-- [ ] Add metadata fields to emergency data:
-  - [x] Data source (e.g. government / telecom / standards body)
-  - [ ] Last verified date
-- [ ] Display this information in a subtle, non-intrusive way
+- [x] Make the selected country impossible to miss
+  - Prominent country display near call actions
+- [x] Calm, human wording for disclaimers
+- [x] Reassuring loading messages
+- [x] Reduce visual noise on call cards (numbers dominate)
 
 **Why this matters:**  
-In an emergency, uncertainty causes hesitation.
+In an emergency, users need instant reassurance they’re looking at the right information.
 
 ---
 
-### 2. Speed & Visual Clarity
+### 2. Trust Signals (Subtle, Non-Intrusive)
 
-**Goal:** Reduce thinking and hesitation.
-
-- [ ] Keep selected country clearly visible at all times
-- [ ] Improve disclaimer wording and placement (short, calm, readable)
-- [ ] Improve loading state (simple placeholder or skeleton)
+- [x] Store verification metadata in data model
+- [ ] Display “last verified” date in a subtle way
+- [ ] Optional source attribution (small, secondary text)
 
 **Why this matters:**  
-The app should feel calm, obvious, and reassuring.
+Users hesitate if they’re unsure whether numbers are current or trustworthy.
 
 ---
 
-### 3. Data Coverage (Incremental)
+### 3. Quick Utility Actions
 
-**Goal:** Make the app useful for more people.
+- [ ] One-tap “Copy all numbers”
+- [ ] Share emergency numbers for the selected country
+
+**Why this matters:**  
+Travelers often need to share information quickly with others.
+
+---
+
+### 4. Data Guardrails
+
+- [ ] Validate incoming country data (`iso2`, services shape)
+- [ ] Fail gracefully on malformed or incomplete data
+
+**Why this matters:**  
+Prevents silent failures as the dataset grows.
+
+---
+
+### 5. Incremental Data Expansion
 
 - [ ] Continue expanding dataset country-by-country
 - [ ] Prioritize:
@@ -136,6 +158,9 @@ These are intentionally postponed until Phase 0 is clearly successful:
 - [ ] User accounts
 - [ ] Crowdsourced edits
 - [ ] Advanced UI polish
+- [ ] “What to say” micro-script (local phrasing + address tips)
+- [ ] First-aid micro-articles (bleeding, choking, CPR)
+- [ ] Share/copy flows for group travel
 
 ---
 
