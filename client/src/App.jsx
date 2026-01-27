@@ -4,6 +4,7 @@ import "./App.css";
 const STORAGE_KEY = "ec_selected_country_iso2";
 const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
 const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
+const STORAGE_MANUAL_KEY = "ec_country_manually_set";
 
 function SingleCallButton({ label, number, badge }) {
   const disabled = !number;
@@ -83,6 +84,35 @@ function CallButton({ label, number }) {
   return <SingleCallButton label={label} number={number} />;
 }
 
+function guessCountryFromTimeZone(tz) {
+  // MVP mapping: small, safe, and only where it's fairly unambiguous.
+  // You can expand later without changing UI.
+  const map = {
+    "Europe/London": "GB",
+    "Europe/Dublin": "IE",
+    "Europe/Paris": "FR",
+    "Europe/Berlin": "DE",
+    "Europe/Madrid": "ES",
+    "Europe/Rome": "IT",
+    "Europe/Amsterdam": "NL",
+    "Europe/Brussels": "BE",
+    "Europe/Zurich": "CH",
+    "Europe/Vienna": "AT",
+    "America/New_York": "US",
+    "America/Los_Angeles": "US",
+    "America/Chicago": "US",
+    "America/Toronto": "CA",
+    "America/Vancouver": "CA",
+    "Australia/Sydney": "AU",
+    "Australia/Melbourne": "AU",
+    "Pacific/Auckland": "NZ",
+    "Asia/Tokyo": "JP",
+    "Asia/Seoul": "KR",
+  };
+
+  return map[tz] || null;
+}
+
 export default function App() {
   const [countries, setCountries] = useState([]);
   const [selectedIso2, setSelectedIso2] = useState(
@@ -93,6 +123,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  const [autoSuggested, setAutoSuggested] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [error, setError] = useState("");
 
@@ -197,6 +228,26 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const manuallySet = localStorage.getItem(STORAGE_MANUAL_KEY) === "1";
+    if (manuallySet) return;
+
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const guess = guessCountryFromTimeZone(tz);
+
+      // Only auto-set if we have a guess and it's different.
+      if (guess && guess !== selectedIso2) {
+        setSelectedIso2(guess);
+        setAutoSuggested(true);
+        window.setTimeout(() => setAutoSuggested(false), 2500);
+      }
+    } catch {
+      // Do nothing — never block usage
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const services = useMemo(
     () => selectedCountry?.services || {},
     [selectedCountry],
@@ -270,6 +321,53 @@ export default function App() {
     }
   }
 
+  async function useMyLocation() {
+    if (!navigator.geolocation) {
+      setError("Location is not supported on this device.");
+      return;
+    }
+
+    setError("");
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          // Reverse geocoding: we need a country code from lat/lng.
+          // MVP: use a free reverse geocode endpoint.
+          const { latitude, longitude } = pos.coords;
+
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+          );
+
+          if (!res.ok)
+            throw new Error("Could not determine country from location.");
+
+          const data = await res.json();
+          const iso2 = data?.address?.country_code?.toUpperCase();
+
+          if (iso2 && /^[A-Z]{2}$/.test(iso2)) {
+            setSelectedIso2(iso2);
+            setAutoSuggested(true);
+            window.setTimeout(() => setAutoSuggested(false), 2500);
+            // Don't set manual flag; user can still override.
+          } else {
+            setError(
+              "Could not determine your country. Please select manually.",
+            );
+          }
+        } catch {
+          setError("Could not determine your country. Please select manually.");
+        }
+      },
+      () => {
+        // Permission denied or failed — never block usage
+        setError("Location access denied. Please select a country manually.");
+      },
+      { enableHighAccuracy: false, timeout: 8000 },
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
@@ -329,7 +427,11 @@ export default function App() {
                 </label>
                 <select
                   value={selectedIso2}
-                  onChange={(e) => setSelectedIso2(e.target.value)}
+                  onChange={(e) => {
+                    const iso2 = e.target.value;
+                    setSelectedIso2(iso2);
+                    localStorage.setItem(STORAGE_MANUAL_KEY, "1");
+                  }}
                   className={[
                     "w-full rounded-2xl border border-slate-200 bg-white",
                     "px-3 py-2.5 text-sm",
@@ -342,6 +444,24 @@ export default function App() {
                     </option>
                   ))}
                 </select>
+                {autoSuggested && (
+                  <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+                    We selected a country automatically — please confirm it's
+                    correct.
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  className={[
+                    "w-full rounded-2xl px-3 py-2.5 text-sm font-semibold",
+                    "border border-slate-200 bg-white",
+                    "hover:bg-slate-50 active:scale-[0.99] transition",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                  ].join(" ")}
+                >
+                  Use my location
+                </button>
               </div>
 
               {filteredCountries.length === 0 && (

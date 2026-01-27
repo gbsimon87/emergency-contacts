@@ -117,9 +117,10 @@ Emergencies often happen where connectivity is weak or unavailable.
 
 **Goal:** Reduce friction when the user is disoriented.
 
-- [ ] Attempt to detect country automatically
-- [ ] Always allow manual override
-- [ ] Never block usage on location permission
+- [x] Attempt to detect country automatically
+- [x] Always allow manual override
+- [x] Never block usage on location permission
+- [x] “Use my location” button (geolocation + reverse lookup)
 
 **Why this matters:**  
 Helpful when it works, dangerous if it’s wrong — must be conservative.
