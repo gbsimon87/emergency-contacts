@@ -89,6 +89,7 @@ export default function App() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loadingCountry, setLoadingCountry] = useState(false);
   const [search, setSearch] = useState("");
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
   async function fetchCountries() {
@@ -148,6 +149,34 @@ export default function App() {
     () => selectedCountry?.services || {},
     [selectedCountry],
   );
+
+  function formatServiceValue(value) {
+    if (!value) return "—";
+    return Array.isArray(value) ? value.join(" / ") : value;
+  }
+
+  async function copyAllNumbers() {
+    if (!selectedCountry) return;
+
+    const lines = [
+      selectedCountry.name,
+      `General: ${formatServiceValue(services.general)}`,
+      `Police: ${formatServiceValue(services.police)}`,
+      `Ambulance: ${formatServiceValue(services.ambulance)}`,
+      `Fire: ${formatServiceValue(services.fire)}`,
+    ];
+
+    const text = lines.join("\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback (older browsers)
+      window.prompt("Copy the emergency numbers:", text);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -293,7 +322,24 @@ export default function App() {
                   </p>
                 </div>
 
-                <p className="text-xs text-slate-500">Tap a card to call</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={copyAllNumbers}
+                    disabled={!selectedCountry}
+                    className={[
+                      "rounded-2xl px-3 py-1.5 text-xs font-semibold",
+                      "border border-slate-200 bg-white",
+                      "hover:bg-slate-50 active:scale-[0.99] transition",
+                      "disabled:opacity-50 disabled:pointer-events-none",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                    ].join(" ")}
+                  >
+                    {copied ? "Copied" : "Copy all"}
+                  </button>
+
+                  <p className="text-xs text-slate-500">Tap a card to call</p>
+                </div>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
