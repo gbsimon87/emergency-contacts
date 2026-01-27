@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const STORAGE_KEY = "ec_selected_country_iso2";
+const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
+const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
 
 function SingleCallButton({ label, number, badge }) {
   const disabled = !number;
@@ -91,6 +93,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [error, setError] = useState("");
 
   async function fetchCountries() {
@@ -99,22 +102,53 @@ export default function App() {
       const res = await fetch("/api/countries");
       if (!res.ok) throw new Error("Failed to load countries");
       const data = await res.json();
+
       setCountries(data);
+      localStorage.setItem(CACHE_COUNTRIES_KEY, JSON.stringify(data));
     } catch {
+      // Fallback: cached country list
+      const cached = localStorage.getItem(CACHE_COUNTRIES_KEY);
+      if (cached) {
+        try {
+          setCountries(JSON.parse(cached));
+          setError("Offline — using last saved country list.");
+          return;
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
+
       setError("Can't reach the server right now. Please try again.");
     }
   }
 
   async function fetchCountryDetails(iso2) {
+    const cacheKey = `${CACHE_COUNTRY_DETAILS_PREFIX}${iso2}`;
+
     try {
       setLoadingCountry(true);
       setError("");
+
       const res = await fetch(`/api/countries/${iso2}`);
       if (!res.ok) throw new Error("Failed to load country details");
       const data = await res.json();
+
       setSelectedCountry(data);
       localStorage.setItem(STORAGE_KEY, iso2);
+      localStorage.setItem(cacheKey, JSON.stringify(data));
     } catch {
+      // Fallback: cached country details
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          setSelectedCountry(JSON.parse(cached));
+          setError("Offline — using last saved emergency numbers.");
+          return;
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
+
       setError(
         "Can't load updated numbers right now. Showing last available info.",
       );
@@ -145,6 +179,23 @@ export default function App() {
       setSelectedIso2(filteredCountries[0].iso2);
     }
   }, [filteredCountries, selectedIso2, search]);
+
+  useEffect(() => {
+    function handleOnline() {
+      setIsOffline(false);
+    }
+    function handleOffline() {
+      setIsOffline(true);
+    }
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const services = useMemo(
     () => selectedCountry?.services || {},
@@ -346,34 +397,53 @@ export default function App() {
           {/* Calls + disclaimer */}
           <div className="space-y-4">
             <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
-              <div className="flex items-baseline justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="text-sm font-semibold">Emergency services</h2>
-                  <p className="mt-1 text-xs text-slate-500">
+
+                  <div className="mt-1">
                     {selectedCountry ? (
-                      <>
-                        Current country:{" "}
-                        <span className="font-semibold text-slate-700">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-xs text-slate-500">
+                          Current country:
+                        </span>
+                        <span className="text-sm font-semibold text-slate-800 truncate">
                           {selectedCountry.name}
                         </span>
-                      </>
+
+                        {isOffline && (
+                          <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                            Offline
+                          </span>
+                        )}
+                      </div>
                     ) : (
-                      "Select a country to view numbers"
+                      <p className="text-xs text-slate-500">
+                        Select a country to view numbers
+                      </p>
                     )}
-                  </p>
+
+                    {/* Only show the long offline message when helpful (mobile-friendly) */}
+                    {isOffline && (
+                      <p className="mt-1 text-[11px] text-amber-800/90">
+                        Using last saved data
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:shrink-0">
                   <button
                     type="button"
                     onClick={copyAllNumbers}
                     disabled={!selectedCountry}
                     className={[
-                      "rounded-2xl px-3 py-1.5 text-xs font-semibold",
+                      "rounded-2xl px-3 py-2 text-xs font-semibold",
                       "border border-slate-200 bg-white",
                       "hover:bg-slate-50 active:scale-[0.99] transition",
                       "disabled:opacity-50 disabled:pointer-events-none",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                      "whitespace-nowrap", // prevents "Copy all" wrapping
                     ].join(" ")}
                   >
                     {copied ? "Copied" : "Copy all"}
@@ -384,11 +454,12 @@ export default function App() {
                     onClick={shareNumbers}
                     disabled={!selectedCountry}
                     className={[
-                      "rounded-2xl px-3 py-1.5 text-xs font-semibold",
+                      "rounded-2xl px-3 py-2 text-xs font-semibold",
                       "border border-slate-200 bg-white",
                       "hover:bg-slate-50 active:scale-[0.99] transition",
                       "disabled:opacity-50 disabled:pointer-events-none",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                      "whitespace-nowrap",
                     ].join(" ")}
                   >
                     {shared ? "Shared" : "Share"}

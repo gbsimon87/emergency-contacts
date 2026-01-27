@@ -104,9 +104,9 @@ They are ordered by _impact in real emergencies_, not by technical interest.
 
 **Goal:** The app should still work when connectivity disappears.
 
-- [ ] Cache last-used country and emergency numbers for offline use
-- [ ] Clear offline indicator (“Using last saved data”)
-- [ ] No background sync or complexity — read-only cache
+- [x] Cache last-used country and emergency numbers for offline use
+- [x] Clear offline indicator (“Using last saved data”)
+- [x] No background sync or complexity — read-only cache
 
 **Why this matters:**  
 Emergencies often happen where connectivity is weak or unavailable.
