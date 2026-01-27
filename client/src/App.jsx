@@ -230,13 +230,23 @@ export default function App() {
               )}
 
               {selectedCountry && (
-                <div className="rounded-2xl border p-4">
-                  <div className="text-xs uppercase tracking-wide opacity-70">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">
                     Emergency numbers for
                   </div>
-                  <div className="text-xl font-bold tracking-tight">
+
+                  <div className="mt-1 text-xl font-bold tracking-tight text-slate-900">
                     {selectedCountry.name}
                   </div>
+
+                  {selectedCountry?.metadata?.lastVerified && (
+                    <div className="mt-2 text-xs text-slate-600">
+                      Last verified:{" "}
+                      <span className="font-medium text-slate-700">
+                        {selectedCountry.metadata.lastVerified}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 

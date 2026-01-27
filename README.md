@@ -95,8 +95,8 @@ In an emergency, users need instant reassurance they’re looking at the right i
 ### 2. Trust Signals (Subtle, Non-Intrusive)
 
 - [x] Store verification metadata in data model
-- [ ] Display “last verified” date in a subtle way
-- [ ] Optional source attribution (small, secondary text)
+- [x] Display “last verified” date in a subtle way
+- [x] Optional source attribution (small, secondary text)
 
 **Why this matters:**  
 Users hesitate if they’re unsure whether numbers are current or trustworthy.
