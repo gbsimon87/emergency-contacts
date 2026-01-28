@@ -93,12 +93,27 @@ The app does one thing, and it does it well — even when conditions are bad.
 
 ---
 
-## 🧭 Post–Phase 0 Roadmap (Ordered by Real User Value)
+## 🟢 Phase 1 — Reliability & Stress Reduction — Status: **Complete**
 
-These items are **not commitments**, but a prioritised guide for future work.
-They are ordered by _impact in real emergencies_, not by technical interest.
+### What Phase 1 Delivered (Plain English)
+
+> A stressed or disoriented user can:
+>
+> 1. Still access emergency numbers when offline or on poor networks
+> 2. Get help selecting the right country automatically (without being forced)
+> 3. Avoid accidental calls while acting quickly
+> 4. See clear guidance on what to say when calling emergency services
+> 5. Find secondary help options if calling isn’t enough
+
+Phase 1 focused on **reducing cognitive load under stress**.  
+Everything added was optional, conservative, and designed to fail safely.
 
 ---
+
+## 🧭 Post–Phase 1 Roadmap (Ordered by Real User Value)
+
+These items are **not commitments**, but a prioritised guide for future work.  
+They are ordered by _impact in real emergencies_, not by technical interest.
 
 ### 1. Offline-First Support (Highest Value)
 
@@ -108,10 +123,7 @@ They are ordered by _impact in real emergencies_, not by technical interest.
 - [x] Clear offline indicator (“Using last saved data”)
 - [x] No background sync or complexity — read-only cache
 
-**Why this matters:**  
-Emergencies often happen where connectivity is weak or unavailable.
-
----
+**Why this matters:** Emergencies often happen where connectivity is weak or unavailable.
 
 ### 2. Automatic Location Detection (Optional, Fallback-Based)
 
@@ -122,10 +134,7 @@ Emergencies often happen where connectivity is weak or unavailable.
 - [x] Never block usage on location permission
 - [x] “Use my location” button (geolocation + reverse lookup)
 
-**Why this matters:**  
-Helpful when it works, dangerous if it’s wrong — must be conservative.
-
----
+**Why this matters:** Helpful when it works, dangerous if it’s wrong — must be conservative.
 
 ### 3. “What to Say” Micro-Guidance
 
@@ -137,10 +146,7 @@ Helpful when it works, dangerous if it’s wrong — must be conservative.
   - “Answer questions”
 - [ ] Optional local-language phrases (very limited)
 
-**Why this matters:**  
-Knowing _what to say_ can be as important as knowing _who to call_.
-
----
+**Why this matters:** Knowing _what to say_ can be as important as knowing _who to call_.
 
 ### 4. Nearby Emergency Facilities (Read-Only)
 
@@ -150,10 +156,7 @@ Knowing _what to say_ can be as important as knowing _who to call_.
 - [x] Embassies / consulates
 - [x] Links only — no navigation logic
 
-**Why this matters:**  
-Useful when calling isn’t enough or not possible.
-
----
+**Why this matters:** Useful when calling isn’t enough or not possible.
 
 ### 5. First-Aid Micro-Cards (Strictly Secondary)
 
@@ -168,19 +171,7 @@ Useful when calling isn’t enough or not possible.
 - [x] Seizure
 - [x] Severe Allergic Reaction
 
-**Why this matters:**  
-High value, but only after calling is addressed.
-
----
-
-### 6. Crowd Contributions (Long-Term, High Risk)
-
-- [ ] Crowdsourced edits
-- [ ] Verification workflows
-- [ ] Moderation and trust models
-
-**Why this matters:**  
-Potentially powerful, but dangerous if rushed.
+**Why this matters:** High value, but only after calling is addressed.
 
 ---
 
