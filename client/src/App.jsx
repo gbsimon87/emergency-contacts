@@ -713,6 +713,14 @@ export default function App() {
     }
   }
 
+  function iso2ToFlag(iso2) {
+    return iso2
+      .toUpperCase()
+      .replace(/./g, (char) =>
+        String.fromCodePoint(127397 + char.charCodeAt()),
+      );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
@@ -821,8 +829,11 @@ export default function App() {
                     Emergency numbers for
                   </div>
 
-                  <div className="mt-1 text-xl font-bold tracking-tight text-slate-900">
-                    {selectedCountry.name}
+                  <div className="mt-1 flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900">
+                    <span className="text-2xl">
+                      {iso2ToFlag(selectedCountry.iso2)}
+                    </span>
+                    <span>{selectedCountry.name}</span>
                   </div>
 
                   {selectedCountry?.metadata?.lastVerified && (
