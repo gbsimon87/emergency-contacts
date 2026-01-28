@@ -6,6 +6,70 @@ const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
 const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
 const STORAGE_MANUAL_KEY = "ec_country_manually_set";
 
+function WhatToSay({ service }) {
+  const labels = {
+    general: "General Emergency",
+    police: "Police",
+    ambulance: "Ambulance",
+    fire: "Fire",
+  };
+
+  const firstLine = {
+    general: "I need emergency help.",
+    police: "I need the police.",
+    ambulance: "I need an ambulance.",
+    fire: "There is a fire. I need the fire service.",
+  };
+
+  const example = {
+    general: "Someone is hurt / there's danger.",
+    police: "There's a crime / I feel unsafe.",
+    ambulance: "Someone is unconscious / injured / bleeding.",
+    fire: "A building / vehicle / area is on fire.",
+  };
+
+  return (
+    <details className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+      <summary className="cursor-pointer select-none text-xs font-semibold text-slate-700 hover:underline focus:outline-none">
+        What should I say?
+      </summary>
+
+      <div className="mt-2 space-y-2 text-xs text-slate-700">
+        <div className="font-semibold">
+          Quick script for {labels[service] || "emergency"}:
+        </div>
+
+        <ol className="list-decimal pl-5 space-y-1">
+          <li>
+            Say the emergency clearly:{" "}
+            <span className="font-semibold">“{firstLine[service]}”</span>
+          </li>
+          <li>
+            Give your location:{" "}
+            <span className="font-semibold">
+              address, landmark, or nearby place
+            </span>
+          </li>
+          <li>
+            Describe what's happening:{" "}
+            <span className="font-semibold">{example[service]}</span>
+          </li>
+          <li>Answer questions and stay on the line.</li>
+          <li>
+            If you can't speak:{" "}
+            <span className="font-semibold">“Please send help.”</span>
+          </li>
+        </ol>
+
+        <p className="text-[11px] text-slate-500">
+          Tip: If English isn't understood, repeat the service name (police /
+          ambulance / fire) and your location slowly.
+        </p>
+      </div>
+    </details>
+  );
+}
+
 function SingleCallButton({ label, number, badge }) {
   const disabled = !number;
 
@@ -588,13 +652,28 @@ export default function App() {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <CallButton
-                  label="General Emergency"
-                  number={services.general}
-                />
-                <CallButton label="Police" number={services.police} />
-                <CallButton label="Ambulance" number={services.ambulance} />
-                <CallButton label="Fire" number={services.fire} />
+                <div>
+                  <CallButton
+                    label="General Emergency"
+                    number={services.general}
+                  />
+                  <WhatToSay service="general" />
+                </div>
+
+                <div>
+                  <CallButton label="Police" number={services.police} />
+                  <WhatToSay service="police" />
+                </div>
+
+                <div>
+                  <CallButton label="Ambulance" number={services.ambulance} />
+                  <WhatToSay service="ambulance" />
+                </div>
+
+                <div>
+                  <CallButton label="Fire" number={services.fire} />
+                  <WhatToSay service="fire" />
+                </div>
               </div>
             </section>
 
