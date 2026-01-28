@@ -159,10 +159,14 @@ Useful when calling isn’t enough or not possible.
 
 **Goal:** Immediate guidance while help is on the way.
 
-- [ ] Bleeding
-- [ ] Choking
-- [ ] CPR
-- [ ] Clear “Call first” vs “Act first” guidance
+- [x] Bleeding
+- [x] Choking
+- [x] Unconscious / Not Responding
+- [x] CPR
+- [x] Heart Attack
+- [x] Stroke
+- [x] Seizure
+- [x] Severe Allergic Reaction
 
 **Why this matters:**  
 High value, but only after calling is addressed.
