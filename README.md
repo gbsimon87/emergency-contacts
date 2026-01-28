@@ -131,7 +131,7 @@ Helpful when it works, dangerous if it’s wrong — must be conservative.
 
 **Goal:** Help users communicate clearly under stress.
 
-- [ ] Short checklist per service:
+- [x] Short checklist per service:
   - “State emergency”
   - “Give location”
   - “Answer questions”
