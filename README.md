@@ -144,7 +144,7 @@ They are ordered by _impact in real emergencies_, not by technical interest.
   - “State emergency”
   - “Give location”
   - “Answer questions”
-- [ ] Optional local-language phrases (very limited)
+- [ ] (Optional, later) Local-language phrases (only for top languages)
 
 **Why this matters:** Knowing _what to say_ can be as important as knowing _who to call_.
 
@@ -172,6 +172,122 @@ They are ordered by _impact in real emergencies_, not by technical interest.
 - [x] Severe Allergic Reaction
 
 **Why this matters:** High value, but only after calling is addressed.
+
+---
+
+## 🟣 Phase 3 — Security, Correctness & Hardening (Planned)
+
+Phase 3 is about making the app **trustworthy under real-world conditions**:
+
+- resistant to common web attacks
+- predictable when permissions are granted/denied
+- safe around third-party APIs
+- no “silent” breakage as the dataset grows
+
+This phase focuses on **fixing issues and reducing risk**, not adding features.
+
+---
+
+### 1) Permissions & Location Correctness (Highest Priority)
+
+**Goal:** If a user grants permission, the app must behave correctly and never show misleading states.
+
+- [ ] Fix bug: user accepts location permission but UI still shows “declined”
+- [ ] Add a clear location state machine:
+  - [ ] Not requested
+  - [ ] Requesting
+  - [ ] Granted (coords available)
+  - [ ] Denied
+  - [ ] Unavailable / timed out
+- [ ] Prevent confusing copy:
+  - [ ] “Denied” only when the browser explicitly denies
+  - [ ] “Timed out” when it times out
+  - [ ] “Unavailable” when device doesn’t support it
+- [ ] Add “Try again” action for location
+- [ ] Never auto-switch country without a confirmation prompt after detection
+
+**Why this matters:**  
+Location is high-impact and high-risk. Misreporting permission status breaks trust immediately.
+
+---
+
+### 2) Security Baseline (Web App Hardening)
+
+**Goal:** Reduce attack surface and enforce safe defaults.
+
+- [ ] Add security headers on the server (Helmet):
+  - [ ] Content Security Policy (CSP) (minimal but real)
+  - [ ] X-Content-Type-Options
+  - [ ] Referrer-Policy
+  - [ ] Permissions-Policy (explicitly define geolocation usage)
+- [ ] Add server-side rate limiting on public endpoints (especially `/api/nearby`)
+- [ ] Add input validation + bounds:
+  - [ ] `/api/nearby`: validate `lat/lon` ranges and clamp radius
+  - [ ] reject non-numeric or extreme values early
+- [ ] Ensure external fetches are safe:
+  - [ ] timeouts / abort controllers for Overpass + geocoding
+  - [ ] caching strategy to prevent request storms
+- [ ] Lock down CORS intentionally (don’t allow `*` unless truly needed)
+- [ ] Dependency audit:
+  - [ ] run `npm audit` and address high severity items
+  - [ ] pin/upgrade vulnerable deps
+
+**Why this matters:**  
+Even “simple” apps are targets. Hardening is mostly cheap now and expensive later.
+
+---
+
+### 3) Data Integrity & Output Safety
+
+**Goal:** Bad data should never crash the UI or produce misleading call actions.
+
+- [ ] Extend server-side validation rules:
+  - [ ] ensure every served country has a valid ISO2 and name
+  - [ ] ensure services are string or string[]
+  - [ ] drop invalid service entries safely
+- [ ] Frontend hardening:
+  - [ ] never render `tel:` links for non-string values
+  - [ ] normalize and display arrays cleanly everywhere
+  - [ ] always show a “—” for missing values (no blank UI)
+- [ ] Add a lightweight “data health” check during build/boot:
+  - [ ] log invalid entries clearly for easy fixes
+
+**Why this matters:**  
+As the dataset grows, mistakes will happen. The app must fail safely.
+
+---
+
+### 4) Reliability & Error Handling Polish
+
+**Goal:** No confusing dead-ends.
+
+- [ ] Standardize error UI:
+  - [ ] network error vs permission error vs provider error
+  - [ ] consistent retry affordances
+- [ ] Add graceful degradation when third-party providers fail:
+  - [ ] Overpass down → show fallback copy + “Try again later”
+  - [ ] geocoder down → don’t treat as “permission denied”
+- [ ] Add minimal performance guards:
+  - [ ] avoid repeated background fetch loops
+  - [ ] dedupe identical nearby requests client-side
+
+**Why this matters:**  
+Users in distress need clarity, not debugging.
+
+---
+
+### 5) Observability (Lightweight)
+
+**Goal:** Identify breakage quickly without collecting sensitive data.
+
+- [ ] Add structured server logs for failures (no PII)
+- [ ] Add a simple “diagnostic mode” (local/dev only):
+  - [ ] show permission state
+  - [ ] show last successful fetch timestamps
+- [ ] Add uptime/health checks for `/api/health` (Render monitoring)
+
+**Why this matters:**  
+You can’t fix what you can’t see — but we also avoid tracking users.
 
 ---
 
