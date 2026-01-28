@@ -70,6 +70,228 @@ function WhatToSay({ service }) {
   );
 }
 
+function FirstAidGuidance() {
+  // const cards = [
+  //   {
+  //     key: "bleeding",
+  //     title: "Bleeding",
+  //     priority: "Call first, then act",
+  //     tone: "call",
+  //     steps: [
+  //       "Apply firm pressure with a clean cloth or your hand.",
+  //       "Raise the injured area if possible.",
+  //       "Do not remove objects stuck in the wound.",
+  //       "Keep pressure until help arrives.",
+  //     ],
+  //     note: "Stop if the situation becomes unsafe.",
+  //   },
+  //   {
+  //     key: "choking",
+  //     title: "Choking",
+  //     priority: "Act immediately, then call",
+  //     tone: "act",
+  //     steps: [
+  //       "Ask: “Can you breathe or cough?”",
+  //       "If not, perform abdominal thrusts (Heimlich).",
+  //       "If the person becomes unresponsive, start CPR.",
+  //       "Call emergency services as soon as possible.",
+  //     ],
+  //     note: "If unsure, act and call for help.",
+  //   },
+  //   {
+  //     key: "cpr",
+  //     title: "CPR",
+  //     priority: "Call first, then act",
+  //     tone: "call",
+  //     steps: [
+  //       "Call emergency services (or ask someone else to call).",
+  //       "Place hands in the center of the chest.",
+  //       "Push hard and fast (about 2 pushes per second).",
+  //       "Continue until help arrives or the person responds.",
+  //     ],
+  //     note: "Any attempt is better than none.",
+  //   },
+  // ];
+
+  const cards = [
+    {
+      key: "bleeding",
+      title: "Bleeding",
+      priority: "Call first, then act",
+      tone: "call",
+      steps: [
+        "Apply firm pressure with a clean cloth or your hand.",
+        "Raise the injured area if possible.",
+        "Do not remove objects stuck in the wound.",
+        "Keep pressure until help arrives.",
+      ],
+      note: "Stop if the situation becomes unsafe.",
+    },
+    {
+      key: "choking",
+      title: "Choking",
+      priority: "Act immediately, then call",
+      tone: "act",
+      steps: [
+        "Ask: “Can you breathe or cough?”",
+        "If not, perform abdominal thrusts (Heimlich).",
+        "If the person becomes unresponsive, start CPR.",
+        "Call emergency services as soon as possible.",
+      ],
+      note: "If unsure, act and call for help.",
+    },
+    {
+      key: "unresponsive",
+      title: "Unconscious / Not Responding",
+      priority: "Call first, then act",
+      tone: "call",
+      steps: [
+        "Check if the person responds when you speak or tap them.",
+        "Call emergency services immediately.",
+        "Check if they are breathing.",
+        "If breathing, place them on their side.",
+        "If not breathing, start CPR.",
+      ],
+      note: "Do not leave the person alone.",
+    },
+    {
+      key: "cpr",
+      title: "CPR",
+      priority: "Call first, then act",
+      tone: "call",
+      steps: [
+        "Call emergency services (or ask someone else to call).",
+        "Place hands in the center of the chest.",
+        "Push hard and fast (about 2 pushes per second).",
+        "Continue until help arrives or the person responds.",
+      ],
+      note: "Any attempt is better than none.",
+    },
+    {
+      key: "heart-attack",
+      title: "Heart Attack",
+      priority: "Call first",
+      tone: "call",
+      steps: [
+        "Call emergency services immediately.",
+        "Help the person sit or lie down comfortably.",
+        "Loosen tight clothing.",
+        "Stay with them and monitor their condition.",
+      ],
+      note: "Chest pain, pressure, or discomfort can be serious.",
+    },
+    {
+      key: "stroke",
+      title: "Stroke",
+      priority: "Call first",
+      tone: "call",
+      steps: [
+        "Check for face drooping.",
+        "Ask them to raise both arms.",
+        "Listen for slurred or unclear speech.",
+        "Call emergency services immediately.",
+      ],
+      note: "Act fast — early treatment saves lives.",
+    },
+    {
+      key: "seizure",
+      title: "Seizure",
+      priority: "Act first, then call",
+      tone: "act",
+      steps: [
+        "Move objects away to prevent injury.",
+        "Protect their head if possible.",
+        "Do not restrain them.",
+        "Do not put anything in their mouth.",
+        "Call emergency services if the seizure lasts more than a few minutes.",
+      ],
+      note: "Stay calm and stay with them.",
+    },
+    {
+      key: "allergic-reaction",
+      title: "Severe Allergic Reaction",
+      priority: "Call first, then act",
+      tone: "call",
+      steps: [
+        "Call emergency services immediately.",
+        "Use an epinephrine auto-injector if available.",
+        "Lay the person flat and raise their legs if possible.",
+        "If breathing is difficult, help them sit up.",
+      ],
+      note: "If in doubt, use the injector and call for help.",
+    },
+  ];
+
+  function badgeClasses(tone) {
+    if (tone === "act") {
+      return "border-amber-200 bg-amber-50 text-amber-900";
+    }
+    return "border-red-200 bg-red-50 text-red-900";
+  }
+
+  return (
+    <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+      <details className="group">
+        <summary className="cursor-pointer select-none focus:outline-none">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-slate-900">
+                First-aid guidance
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                Short steps while help is on the way. Always call emergency
+                services first when possible.
+              </div>
+            </div>
+
+            <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              View
+            </span>
+          </div>
+        </summary>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {cards.map((c) => (
+            <div
+              key={c.key}
+              className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="text-sm font-semibold text-slate-900">
+                  {c.title}
+                </div>
+                <span
+                  className={[
+                    "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                    badgeClasses(c.tone),
+                  ].join(" ")}
+                >
+                  {c.priority}
+                </span>
+              </div>
+
+              <ol className="mt-3 list-decimal pl-5 space-y-1.5 text-xs text-slate-700">
+                {c.steps.map((s, idx) => (
+                  <li key={idx}>{s}</li>
+                ))}
+              </ol>
+
+              <div className="mt-3 text-[11px] text-slate-600">
+                <span className="font-semibold">Reminder:</span> {c.note}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 text-[11px] text-slate-500">
+          This is not medical training. If you are unsure, prioritize calling
+          emergency services and keeping the scene safe.
+        </div>
+      </details>
+    </section>
+  );
+}
+
 function SingleCallButton({ label, number, badge }) {
   const disabled = !number;
 
@@ -736,6 +958,7 @@ export default function App() {
               </div>
             </section>
 
+            {/* Nearby help section */}
             <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
               <details
                 className="group"
@@ -919,6 +1142,10 @@ export default function App() {
               </details>
             </section>
 
+            {/* First aid micro-cards */}
+            <FirstAidGuidance />
+
+            {/* Footer */}
             <footer className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
               <p className="text-sm font-semibold">Disclaimer</p>
               <p className="mt-1 text-sm text-slate-600">
