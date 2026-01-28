@@ -177,6 +177,16 @@ function guessCountryFromTimeZone(tz) {
   return map[tz] || null;
 }
 
+function formatDistance(meters) {
+  if (!Number.isFinite(meters)) return "";
+  if (meters < 1000) return `${meters} m`;
+  return `${(meters / 1000).toFixed(1)} km`;
+}
+
+function mapsLink(lat, lon) {
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+}
+
 export default function App() {
   const [countries, setCountries] = useState([]);
   const [selectedIso2, setSelectedIso2] = useState(
@@ -189,6 +199,10 @@ export default function App() {
   const [shared, setShared] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [nearbyError, setNearbyError] = useState("");
+  const [nearbyHospitals, setNearbyHospitals] = useState([]);
+  const [nearbyDiplomatic, setNearbyDiplomatic] = useState([]);
   const [error, setError] = useState("");
 
   async function fetchCountries() {
@@ -430,6 +444,51 @@ export default function App() {
       },
       { enableHighAccuracy: false, timeout: 8000 },
     );
+  }
+
+  function getLocationOnce() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Location is not supported on this device."));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve(pos.coords),
+        () => reject(new Error("Location access denied.")),
+        { enableHighAccuracy: false, timeout: 8000 },
+      );
+    });
+  }
+
+  async function loadNearby() {
+    try {
+      setNearbyError("");
+      setNearbyLoading(true);
+
+      const coords = await getLocationOnce();
+      const lat = coords.latitude;
+      const lon = coords.longitude;
+
+      const [hRes, dRes] = await Promise.all([
+        fetch(`/api/nearby?type=hospitals&lat=${lat}&lon=${lon}`),
+        fetch(`/api/nearby?type=diplomatic&lat=${lat}&lon=${lon}`),
+      ]);
+
+      if (!hRes.ok || !dRes.ok) {
+        throw new Error("Could not load nearby places.");
+      }
+
+      const h = await hRes.json();
+      const d = await dRes.json();
+
+      setNearbyHospitals(h.items || []);
+      setNearbyDiplomatic(d.items || []);
+    } catch (e) {
+      setNearbyError(e.message || "Could not load nearby places.");
+    } finally {
+      setNearbyLoading(false);
+    }
   }
 
   return (
@@ -675,6 +734,189 @@ export default function App() {
                   <WhatToSay service="fire" />
                 </div>
               </div>
+            </section>
+
+            <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+              <details
+                className="group"
+                onToggle={(e) => {
+                  const open = e.currentTarget.open;
+                  if (
+                    open &&
+                    nearbyHospitals.length === 0 &&
+                    nearbyDiplomatic.length === 0 &&
+                    !nearbyLoading
+                  ) {
+                    loadNearby();
+                  }
+                }}
+              >
+                <summary className="cursor-pointer select-none text-sm font-semibold text-slate-900 focus:outline-none">
+                  Nearby help (optional)
+                  <span className="ml-2 text-xs font-normal text-slate-500">
+                    Hospitals and embassies/consulates
+                  </span>
+                </summary>
+
+                <div className="mt-3 space-y-4">
+                  {nearbyLoading && (
+                    <p className="text-sm text-slate-600">
+                      Finding nearby places…
+                    </p>
+                  )}
+
+                  {nearbyError && (
+                    <div className="rounded-2xl border border-red-200 bg-white p-3">
+                      <p className="text-sm text-red-700">{nearbyError}</p>
+                      <button
+                        type="button"
+                        onClick={loadNearby}
+                        className="mt-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {!nearbyLoading && !nearbyError && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">
+                          Nearby hospitals
+                        </div>
+                        {nearbyHospitals.length === 0 ? (
+                          <p className="text-sm text-slate-600">
+                            No hospitals found nearby.
+                          </p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {nearbyHospitals.map((p) => (
+                              <li
+                                key={p.id}
+                                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-sm font-semibold text-slate-900">
+                                      {p.name}
+                                    </div>
+                                    <div className="mt-0.5 text-xs text-slate-600">
+                                      {formatDistance(p.distanceM)}
+                                      {p.address ? ` • ${p.address}` : ""}
+                                    </div>
+                                  </div>
+
+                                  <a
+                                    href={mapsLink(p.lat, p.lon)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                  >
+                                    Open in Maps
+                                  </a>
+                                </div>
+
+                                {(p.phone || p.website) && (
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {p.phone && (
+                                      <a
+                                        href={`tel:${p.phone}`}
+                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                      >
+                                        Call
+                                      </a>
+                                    )}
+                                    {p.website && (
+                                      <a
+                                        href={p.website}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                      >
+                                        Website
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">
+                          Embassies / consulates
+                        </div>
+                        {nearbyDiplomatic.length === 0 ? (
+                          <p className="text-sm text-slate-600">
+                            No embassies or consulates found nearby.
+                          </p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {nearbyDiplomatic.map((p) => (
+                              <li
+                                key={p.id}
+                                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-sm font-semibold text-slate-900">
+                                      {p.name}
+                                    </div>
+                                    <div className="mt-0.5 text-xs text-slate-600">
+                                      {formatDistance(p.distanceM)}
+                                      {p.address ? ` • ${p.address}` : ""}
+                                    </div>
+                                  </div>
+
+                                  <a
+                                    href={mapsLink(p.lat, p.lon)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                  >
+                                    Open in Maps
+                                  </a>
+                                </div>
+
+                                {(p.phone || p.website) && (
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {p.phone && (
+                                      <a
+                                        href={`tel:${p.phone}`}
+                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                      >
+                                        Call
+                                      </a>
+                                    )}
+                                    {p.website && (
+                                      <a
+                                        href={p.website}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                      >
+                                        Website
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <p className="text-[11px] text-slate-500">
+                        These results come from OpenStreetMap and may be
+                        incomplete. Always call emergency services first when
+                        possible.
+                      </p>
+                    </>
+                  )}
+                </div>
+              </details>
             </section>
 
             <footer className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">

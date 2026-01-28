@@ -146,9 +146,9 @@ Knowing _what to say_ can be as important as knowing _who to call_.
 
 **Goal:** Provide secondary help options.
 
-- [ ] Nearby hospitals
-- [ ] Embassies / consulates
-- [ ] Links only — no navigation logic
+- [x] Nearby hospitals
+- [x] Embassies / consulates
+- [x] Links only — no navigation logic
 
 **Why this matters:**  
 Useful when calling isn’t enough or not possible.

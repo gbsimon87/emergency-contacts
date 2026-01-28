@@ -117,6 +117,146 @@ app.get("/api/countries/:iso2", (req, res) => {
   res.json(country);
 });
 
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+
+// Simple in-memory cache (Phase 1 MVP)
+const nearbyCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+function cacheGet(key) {
+  const entry = nearbyCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.time > CACHE_TTL_MS) {
+    nearbyCache.delete(key);
+    return null;
+  }
+  return entry.value;
+}
+
+function cacheSet(key, value) {
+  nearbyCache.set(key, { time: Date.now(), value });
+}
+
+// Haversine distance (meters)
+function distanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function buildOverpassQuery(type, lat, lon) {
+  // radius in meters
+  const radius = type === "diplomatic" ? 20000 : 10000;
+
+  if (type === "hospitals") {
+    return `
+[out:json][timeout:25];
+(
+  node(around:${radius},${lat},${lon})["amenity"="hospital"];
+  way(around:${radius},${lat},${lon})["amenity"="hospital"];
+  relation(around:${radius},${lat},${lon})["amenity"="hospital"];
+);
+out center tags;
+`.trim();
+  }
+
+  if (type === "diplomatic") {
+    return `
+[out:json][timeout:25];
+(
+  node(around:${radius},${lat},${lon})["amenity"="embassy"];
+  way(around:${radius},${lat},${lon})["amenity"="embassy"];
+  relation(around:${radius},${lat},${lon})["amenity"="embassy"];
+
+  node(around:${radius},${lat},${lon})["office"="diplomatic"];
+  way(around:${radius},${lat},${lon})["office"="diplomatic"];
+  relation(around:${radius},${lat},${lon})["office"="diplomatic"];
+);
+out center tags;
+`.trim();
+  }
+
+  return null;
+}
+
+app.get("/api/nearby", async (req, res) => {
+  try {
+    const type = String(req.query.type || "");
+    const lat = Number(req.query.lat);
+    const lon = Number(req.query.lon);
+
+    if (!["hospitals", "diplomatic"].includes(type)) {
+      return res.status(400).json({ error: "Invalid type" });
+    }
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return res.status(400).json({ error: "Invalid lat/lon" });
+    }
+
+    // Round coords for cache key
+    const key = `${type}:${lat.toFixed(3)}:${lon.toFixed(3)}`;
+    const cached = cacheGet(key);
+    if (cached) return res.json(cached);
+
+    const query = buildOverpassQuery(type, lat, lon);
+    if (!query) return res.status(400).json({ error: "Invalid type" });
+
+    const overpassRes = await fetch(OVERPASS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: query,
+    });
+
+    if (!overpassRes.ok) {
+      return res.status(502).json({ error: "Failed to fetch nearby places" });
+    }
+
+    const data = await overpassRes.json();
+
+    const items = (data.elements || [])
+      .map((el) => {
+        const t = el.tags || {};
+        const pLat = el.lat ?? el.center?.lat;
+        const pLon = el.lon ?? el.center?.lon;
+        if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return null;
+
+        const addressParts = [
+          t["addr:housenumber"],
+          t["addr:street"],
+          t["addr:city"] || t["addr:town"] || t["addr:village"],
+          t["addr:postcode"],
+        ].filter(Boolean);
+
+        return {
+          id: `${el.type}/${el.id}`,
+          name:
+            t.name ||
+            (type === "hospitals" ? "Hospital" : "Embassy / Consulate"),
+          lat: pLat,
+          lon: pLon,
+          distanceM: Math.round(distanceMeters(lat, lon, pLat, pLon)),
+          address: addressParts.join(", ") || null,
+          phone: t.phone || t["contact:phone"] || null,
+          website: t.website || t["contact:website"] || null,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.distanceM - b.distanceM)
+      .slice(0, 10);
+
+    const payload = { type, lat, lon, items };
+
+    cacheSet(key, payload);
+    res.json(payload);
+  } catch {
+    res.status(500).json({ error: "Unexpected error" });
+  }
+});
+
 const clientDistPath = path.resolve(__dirname, "../../client/dist");
 
 // Only serve the built client when running in production
