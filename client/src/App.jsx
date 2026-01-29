@@ -251,8 +251,36 @@ function FirstAidGuidance() {
   );
 }
 
+function safeTelHref(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const cleaned = trimmed.replace(/[^\d+().\-\s]/g, "");
+  const normalized = cleaned.replace(/\s+/g, " ").trim();
+  if (!normalized) return null;
+
+  return `tel:${normalized}`;
+}
+
+function safeHttpUrl(value) {
+  if (typeof value !== "string") return null;
+
+  try {
+    const u = new URL(value);
+    if (u.protocol === "http:" || u.protocol === "https:") {
+      return u.toString();
+    }
+  } catch {
+    // Invalid URL — ignore safely
+  }
+
+  return null;
+}
+
 function SingleCallButton({ label, number, badge }) {
-  const disabled = !number;
+  const telHref = safeTelHref(number);
+  const disabled = !telHref;
 
   function handleClick(e) {
     if (disabled) return;
@@ -262,19 +290,16 @@ function SingleCallButton({ label, number, badge }) {
 
   return (
     <a
-      href={number ? `tel:${number}` : undefined}
+      href={telHref || undefined}
       onClick={handleClick}
       className={[
-        // card surface
         "group block w-full rounded-2xl bg-white",
         "border border-slate-200/70 shadow-sm",
         "p-4 sm:p-5",
-        // interaction
         "transition will-change-transform",
         disabled
           ? "opacity-50 pointer-events-none"
           : "hover:shadow-md hover:-translate-y-[1px] active:translate-y-0 active:shadow-sm",
-        // focus
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50",
       ].join(" ")}
     >
@@ -290,7 +315,7 @@ function SingleCallButton({ label, number, badge }) {
           </div>
 
           <div className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
-            {number || "—"}
+            {typeof number === "string" && number.trim() ? number : "—"}
           </div>
         </div>
 
@@ -649,14 +674,16 @@ export default function App() {
       setNearbyHospitals(h.items || []);
       setNearbyDiplomatic(d.items || []);
     } catch (e) {
+      const status = e?.status || location?.status;
+
       // If location failed, show a nearby-specific message, not another "Denied" box.
-      if (location?.status === "denied") {
+      if (status === "denied") {
         setNearbyError(
           "Location permission is denied. Enable it to use Nearby help.",
         );
-      } else if (location?.status === "timed_out") {
+      } else if (status === "timed_out") {
         setNearbyError("Location timed out. Try again.");
-      } else if (location?.status === "unavailable") {
+      } else if (status === "unavailable") {
         setNearbyError("Location is unavailable on this device right now.");
       } else {
         setNearbyError(e?.message || "Could not load nearby places.");
@@ -810,7 +837,7 @@ export default function App() {
                     {(location.status === "denied" ||
                       location.status === "timed_out" ||
                       location.status === "unavailable" ||
-                      location.status === "appError") && (
+                      location.status === "error") && (
                       <button
                         type="button"
                         onClick={useMyLocation}
@@ -1067,56 +1094,61 @@ export default function App() {
                           </p>
                         ) : (
                           <ul className="space-y-2">
-                            {nearbyHospitals.map((p) => (
-                              <li
-                                key={p.id}
-                                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                              >
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <div className="text-sm font-semibold text-slate-900">
-                                      {p.name}
+                            {nearbyHospitals.map((p) => {
+                              const tel = safeTelHref(p.phone);
+                              const site = safeHttpUrl(p.website);
+
+                              return (
+                                <li
+                                  key={p.id}
+                                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <div className="text-sm font-semibold text-slate-900">
+                                        {p.name}
+                                      </div>
+                                      <div className="mt-0.5 text-xs text-slate-600">
+                                        {formatDistance(p.distanceM)}
+                                        {p.address ? ` • ${p.address}` : ""}
+                                      </div>
                                     </div>
-                                    <div className="mt-0.5 text-xs text-slate-600">
-                                      {formatDistance(p.distanceM)}
-                                      {p.address ? ` • ${p.address}` : ""}
-                                    </div>
+
+                                    <a
+                                      href={mapsLink(p.lat, p.lon)}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                    >
+                                      Open in Maps
+                                    </a>
                                   </div>
 
-                                  <a
-                                    href={mapsLink(p.lat, p.lon)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
-                                  >
-                                    Open in Maps
-                                  </a>
-                                </div>
-
-                                {(p.phone || p.website) && (
-                                  <div className="mt-2 flex flex-wrap gap-2">
-                                    {p.phone && (
-                                      <a
-                                        href={`tel:${p.phone}`}
-                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
-                                      >
-                                        Call
-                                      </a>
-                                    )}
-                                    {p.website && (
-                                      <a
-                                        href={p.website}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
-                                      >
-                                        Website
-                                      </a>
-                                    )}
-                                  </div>
-                                )}
-                              </li>
-                            ))}
+                                  {(tel || site) && (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {tel && (
+                                        <a
+                                          href={tel}
+                                          className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                        >
+                                          Call
+                                        </a>
+                                      )}
+                                      {site && (
+                                        <a
+                                          href={site}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
+                                        >
+                                          Website
+                                        </a>
+                                      )}
+                                    </div>
+                                  )}
+                                </li>
+                              );
+                            })}
                           </ul>
                         )}
                       </div>
@@ -1159,9 +1191,9 @@ export default function App() {
 
                                 {(p.phone || p.website) && (
                                   <div className="mt-2 flex flex-wrap gap-2">
-                                    {p.phone && (
+                                    {safeTelHref(p.phone) && (
                                       <a
-                                        href={`tel:${p.phone}`}
+                                        href={safeTelHref(p.phone)}
                                         className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-100"
                                       >
                                         Call

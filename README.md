@@ -228,9 +228,9 @@ Location is high-impact and high-risk. Misreporting permission status breaks tru
   - [x] timeouts / abort controllers for Overpass + geocoding
   - [x] caching strategy to prevent request storms
 - [x] Lock down CORS intentionally (don’t allow `*` unless truly needed)
-- [ ] Dependency audit:
-  - [ ] run `npm audit` and address high severity items
-  - [ ] pin/upgrade vulnerable deps
+- [x] Dependency audit:
+  - [x] run `npm audit` and address high severity items
+  - [x] pin/upgrade vulnerable deps
 
 **Why this matters:**  
 Even “simple” apps are targets. Hardening is mostly cheap now and expensive later.
@@ -241,16 +241,16 @@ Even “simple” apps are targets. Hardening is mostly cheap now and expensive 
 
 **Goal:** Bad data should never crash the UI or produce misleading call actions.
 
-- [ ] Extend server-side validation rules:
-  - [ ] ensure every served country has a valid ISO2 and name
-  - [ ] ensure services are string or string[]
-  - [ ] drop invalid service entries safely
-- [ ] Frontend hardening:
-  - [ ] never render `tel:` links for non-string values
-  - [ ] normalize and display arrays cleanly everywhere
-  - [ ] always show a “—” for missing values (no blank UI)
-- [ ] Add a lightweight “data health” check during build/boot:
-  - [ ] log invalid entries clearly for easy fixes
+- [x] Extend server-side validation rules:
+  - [x] ensure every served country has a valid ISO2 and name
+  - [x] ensure services are string or string[]
+  - [x] drop invalid service entries safely
+- [x] Frontend hardening:
+  - [x] never render `tel:` links for non-string values
+  - [x] normalize and display arrays cleanly everywhere
+  - [x] always show a “—” for missing values (no blank UI)
+- [x] Add a lightweight “data health” check during build/boot:
+  - [x] log invalid entries clearly for easy fixes
 
 **Why this matters:**  
 As the dataset grows, mistakes will happen. The app must fail safely.

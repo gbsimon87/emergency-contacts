@@ -112,8 +112,8 @@ function isValidLatLon(lat, lon) {
   );
 }
 
-app.use("/api/nearby", nearbyLimiter);
 app.use("/api", apiLimiter);
+app.use("/api/nearby", nearbyLimiter);
 
 function isValidIso2(value) {
   return typeof value === "string" && /^[A-Z]{2}$/.test(value);
@@ -149,9 +149,7 @@ function validateAndNormalizeCountries(raw) {
     const iso2 = typeof iso2Raw === "string" ? iso2Raw.toUpperCase() : iso2Raw;
 
     if (!isValidIso2(iso2)) {
-      errors.push(
-        `${path}: invalid iso2 "${iso2Raw}" (expected 2-letter code like "BE")`,
-      );
+      errors.push(`${at}: invalid iso2 "${iso2Raw}" (expected "BE")`);
       continue;
     }
 
@@ -267,6 +265,15 @@ function distanceMeters(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+function safeHttpUrl(url) {
+  if (typeof url !== "string") return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol === "http:" || u.protocol === "https:") return u.toString();
+  } catch {}
+  return null;
+}
+
 function buildOverpassQuery(type, lat, lon, radius) {
   if (type === "hospitals") {
     return `
@@ -353,7 +360,7 @@ app.get("/api/nearby", async (req, res) => {
           headers: { "Content-Type": "text/plain" },
           body: query,
         },
-        10_000,
+        15_000,
       );
 
       if (!overpassRes.ok) {
@@ -388,7 +395,8 @@ app.get("/api/nearby", async (req, res) => {
             distanceM: Math.round(distanceMeters(lat, lon, pLat, pLon)),
             address: addressParts.join(", ") || null,
             phone: t.phone || t["contact:phone"] || null,
-            website: t.website || t["contact:website"] || null,
+            // website: t.website || t["contact:website"] || null,
+            website: safeHttpUrl(t.website || t["contact:website"]) || null,
           };
         })
         .filter(Boolean)
