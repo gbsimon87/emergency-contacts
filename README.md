@@ -192,19 +192,19 @@ This phase focuses on **fixing issues and reducing risk**, not adding features.
 
 **Goal:** If a user grants permission, the app must behave correctly and never show misleading states.
 
-- [ ] Fix bug: user accepts location permission but UI still shows “declined”
-- [ ] Add a clear location state machine:
-  - [ ] Not requested
-  - [ ] Requesting
-  - [ ] Granted (coords available)
-  - [ ] Denied
-  - [ ] Unavailable / timed out
-- [ ] Prevent confusing copy:
-  - [ ] “Denied” only when the browser explicitly denies
-  - [ ] “Timed out” when it times out
-  - [ ] “Unavailable” when device doesn’t support it
-- [ ] Add “Try again” action for location
-- [ ] Never auto-switch country without a confirmation prompt after detection
+- [x] Fix bug: user accepts location permission but UI still shows “declined”
+- [x] Add a clear location state machine:
+  - [x] Not requested
+  - [x] Requesting
+  - [x] Granted (coords available)
+  - [x] Denied
+  - [x] Unavailable / timed out
+- [x] Prevent confusing copy:
+  - [x] “Denied” only when the browser explicitly denies
+  - [x] “Timed out” when it times out
+  - [x] “Unavailable” when device doesn’t support it
+- [x] Add “Try again” action for location
+- [x] Never auto-switch country without a confirmation prompt after detection
 
 **Why this matters:**  
 Location is high-impact and high-risk. Misreporting permission status breaks trust immediately.
@@ -215,19 +215,19 @@ Location is high-impact and high-risk. Misreporting permission status breaks tru
 
 **Goal:** Reduce attack surface and enforce safe defaults.
 
-- [ ] Add security headers on the server (Helmet):
-  - [ ] Content Security Policy (CSP) (minimal but real)
-  - [ ] X-Content-Type-Options
-  - [ ] Referrer-Policy
-  - [ ] Permissions-Policy (explicitly define geolocation usage)
-- [ ] Add server-side rate limiting on public endpoints (especially `/api/nearby`)
-- [ ] Add input validation + bounds:
-  - [ ] `/api/nearby`: validate `lat/lon` ranges and clamp radius
-  - [ ] reject non-numeric or extreme values early
-- [ ] Ensure external fetches are safe:
-  - [ ] timeouts / abort controllers for Overpass + geocoding
-  - [ ] caching strategy to prevent request storms
-- [ ] Lock down CORS intentionally (don’t allow `*` unless truly needed)
+- [x] Add security headers on the server (Helmet):
+  - [x] Content Security Policy (CSP) (minimal but real)
+  - [x] X-Content-Type-Options
+  - [x] Referrer-Policy
+  - [x] Permissions-Policy (explicitly define geolocation usage)
+- [x] Add server-side rate limiting on public endpoints (especially `/api/nearby`)
+- [x] Add input validation + bounds:
+  - [x] `/api/nearby`: validate `lat/lon` ranges and clamp radius
+  - [x] reject non-numeric or extreme values early
+- [x] Ensure external fetches are safe:
+  - [x] timeouts / abort controllers for Overpass + geocoding
+  - [x] caching strategy to prevent request storms
+- [x] Lock down CORS intentionally (don’t allow `*` unless truly needed)
 - [ ] Dependency audit:
   - [ ] run `npm audit` and address high severity items
   - [ ] pin/upgrade vulnerable deps
