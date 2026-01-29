@@ -29,7 +29,12 @@ app.use(
       directives: {
         "default-src": ["'self'"],
         "img-src": ["'self'", "data:", "https:"],
-        "style-src": ["'self'", "'unsafe-inline'"],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com",
+        ],
+        "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
         "script-src": ["'self'"],
         "connect-src": [
           "'self'",
