@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useGeolocation } from "./hooks/useGeolocation";
 import "./App.css";
 
 const STORAGE_KEY = "ec_selected_country_iso2";
@@ -71,48 +72,6 @@ function WhatToSay({ service }) {
 }
 
 function FirstAidGuidance() {
-  // const cards = [
-  //   {
-  //     key: "bleeding",
-  //     title: "Bleeding",
-  //     priority: "Call first, then act",
-  //     tone: "call",
-  //     steps: [
-  //       "Apply firm pressure with a clean cloth or your hand.",
-  //       "Raise the injured area if possible.",
-  //       "Do not remove objects stuck in the wound.",
-  //       "Keep pressure until help arrives.",
-  //     ],
-  //     note: "Stop if the situation becomes unsafe.",
-  //   },
-  //   {
-  //     key: "choking",
-  //     title: "Choking",
-  //     priority: "Act immediately, then call",
-  //     tone: "act",
-  //     steps: [
-  //       "Ask: “Can you breathe or cough?”",
-  //       "If not, perform abdominal thrusts (Heimlich).",
-  //       "If the person becomes unresponsive, start CPR.",
-  //       "Call emergency services as soon as possible.",
-  //     ],
-  //     note: "If unsure, act and call for help.",
-  //   },
-  //   {
-  //     key: "cpr",
-  //     title: "CPR",
-  //     priority: "Call first, then act",
-  //     tone: "call",
-  //     steps: [
-  //       "Call emergency services (or ask someone else to call).",
-  //       "Place hands in the center of the chest.",
-  //       "Push hard and fast (about 2 pushes per second).",
-  //       "Continue until help arrives or the person responds.",
-  //     ],
-  //     note: "Any attempt is better than none.",
-  //   },
-  // ];
-
   const cards = [
     {
       key: "bleeding",
@@ -425,11 +384,14 @@ export default function App() {
   const [nearbyError, setNearbyError] = useState("");
   const [nearbyHospitals, setNearbyHospitals] = useState([]);
   const [nearbyDiplomatic, setNearbyDiplomatic] = useState([]);
-  const [error, setError] = useState("");
+  const { location, requestOnce: requestLocationOnce } = useGeolocation();
+  const [detectedIso2, setDetectedIso2] = useState(null);
+  const [detectingCountry, setDetectingCountry] = useState(false);
+  const [appError, setAppError] = useState("");
 
   async function fetchCountries() {
     try {
-      setError("");
+      setAppError("");
       const res = await fetch("/api/countries");
       if (!res.ok) throw new Error("Failed to load countries");
       const data = await res.json();
@@ -442,14 +404,14 @@ export default function App() {
       if (cached) {
         try {
           setCountries(JSON.parse(cached));
-          setError("Offline — using last saved country list.");
+          setAppError("Offline — using last saved country list.");
           return;
         } catch {
           // ignore JSON parse errors
         }
       }
 
-      setError("Can't reach the server right now. Please try again.");
+      setAppError("Can't reach the server right now. Please try again.");
     }
   }
 
@@ -458,7 +420,7 @@ export default function App() {
 
     try {
       setLoadingCountry(true);
-      setError("");
+      setAppError("");
 
       const res = await fetch(`/api/countries/${iso2}`);
       if (!res.ok) throw new Error("Failed to load country details");
@@ -473,14 +435,14 @@ export default function App() {
       if (cached) {
         try {
           setSelectedCountry(JSON.parse(cached));
-          setError("Offline — using last saved emergency numbers.");
+          setAppError("Offline — using last saved emergency numbers.");
           return;
         } catch {
           // ignore JSON parse errors
         }
       }
 
-      setError(
+      setAppError(
         "Can't load updated numbers right now. Showing last available info.",
       );
       // Keep selectedCountry as-is (last known numbers)
@@ -622,65 +584,46 @@ export default function App() {
   }
 
   async function useMyLocation() {
-    if (!navigator.geolocation) {
-      setError("Location is not supported on this device.");
-      return;
-    }
+    setAppError("");
 
-    setError("");
+    let coords = null;
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          // Reverse geocoding: we need a country code from lat/lng.
-          // MVP: use a free reverse geocode endpoint.
-          const { latitude, longitude } = pos.coords;
+    try {
+      setDetectingCountry(true);
 
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-          );
+      // If this fails, the hook will set location.status/errorMessage
+      coords = await requestLocationOnce();
 
-          if (!res.ok)
-            throw new Error("Could not determine country from location.");
-
-          const data = await res.json();
-          const iso2 = data?.address?.country_code?.toUpperCase();
-
-          if (iso2 && /^[A-Z]{2}$/.test(iso2)) {
-            setSelectedIso2(iso2);
-            setAutoSuggested(true);
-            window.setTimeout(() => setAutoSuggested(false), 2500);
-            // Don't set manual flag; user can still override.
-          } else {
-            setError(
-              "Could not determine your country. Please select manually.",
-            );
-          }
-        } catch {
-          setError("Could not determine your country. Please select manually.");
-        }
-      },
-      () => {
-        // Permission denied or failed — never block usage
-        setError("Location access denied. Please select a country manually.");
-      },
-      { enableHighAccuracy: false, timeout: 8000 },
-    );
-  }
-
-  function getLocationOnce() {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Location is not supported on this device."));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve(pos.coords),
-        () => reject(new Error("Location access denied.")),
-        { enableHighAccuracy: false, timeout: 8000 },
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon}`,
       );
-    });
+
+      if (!res.ok)
+        throw new Error("Could not determine country from location.");
+
+      const data = await res.json();
+      const iso2 = data?.address?.country_code?.toUpperCase();
+
+      if (iso2 && /^[A-Z]{2}$/.test(iso2)) {
+        setDetectedIso2(iso2);
+      } else {
+        setAppError(
+          "Could not determine your country. Please select manually.",
+        );
+      }
+    } catch (e) {
+      // Only use global appError when geocoding failed AFTER coords were obtained.
+      if (coords) {
+        setAppError(
+          e?.message ||
+            "Could not determine your country. Please select manually.",
+        );
+      }
+      // If coords are null, it was a location permission/unavailable/timeout issue,
+      // and the location status box will already show the right message.
+    } finally {
+      setDetectingCountry(false);
+    }
   }
 
   async function loadNearby() {
@@ -688,18 +631,17 @@ export default function App() {
       setNearbyError("");
       setNearbyLoading(true);
 
-      const coords = await getLocationOnce();
-      const lat = coords.latitude;
-      const lon = coords.longitude;
+      const coords = await requestLocationOnce();
+      const lat = coords.lat;
+      const lon = coords.lon;
 
       const [hRes, dRes] = await Promise.all([
         fetch(`/api/nearby?type=hospitals&lat=${lat}&lon=${lon}`),
         fetch(`/api/nearby?type=diplomatic&lat=${lat}&lon=${lon}`),
       ]);
 
-      if (!hRes.ok || !dRes.ok) {
+      if (!hRes.ok || !dRes.ok)
         throw new Error("Could not load nearby places.");
-      }
 
       const h = await hRes.json();
       const d = await dRes.json();
@@ -707,7 +649,18 @@ export default function App() {
       setNearbyHospitals(h.items || []);
       setNearbyDiplomatic(d.items || []);
     } catch (e) {
-      setNearbyError(e.message || "Could not load nearby places.");
+      // If location failed, show a nearby-specific message, not another "Denied" box.
+      if (location?.status === "denied") {
+        setNearbyError(
+          "Location permission is denied. Enable it to use Nearby help.",
+        );
+      } else if (location?.status === "timed_out") {
+        setNearbyError("Location timed out. Try again.");
+      } else if (location?.status === "unavailable") {
+        setNearbyError("Location is unavailable on this device right now.");
+      } else {
+        setNearbyError(e?.message || "Could not load nearby places.");
+      }
     } finally {
       setNearbyLoading(false);
     }
@@ -803,7 +756,7 @@ export default function App() {
                     correct.
                   </div>
                 )}
-                <button
+                {/* <button
                   type="button"
                   onClick={useMyLocation}
                   className={[
@@ -814,7 +767,97 @@ export default function App() {
                   ].join(" ")}
                 >
                   Use my location
+                </button> */}
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  className={[
+                    "w-full rounded-2xl px-3 py-2.5 text-sm font-semibold",
+                    "border border-slate-200 bg-white",
+                    "hover:bg-slate-50 active:scale-[0.99] transition",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                    detectingCountry ? "opacity-70 pointer-events-none" : "",
+                  ].join(" ")}
+                >
+                  {detectingCountry ? "Detecting…" : "Use my location"}
                 </button>
+
+                {/* Location status (truthful state machine) */}
+                {location.status !== "not_requested" && (
+                  <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 space-y-1">
+                    <div>
+                      <span className="font-semibold">Location status:</span>{" "}
+                      {location.status === "requesting"
+                        ? "Requesting…"
+                        : location.status === "granted"
+                          ? "Granted"
+                          : location.status === "denied"
+                            ? "Denied"
+                            : location.status === "timed_out"
+                              ? "Timed out"
+                              : location.status === "unavailable"
+                                ? "Unavailable"
+                                : "Error"}
+                    </div>
+
+                    {location.errorMessage && (
+                      <div className="text-[11px] text-slate-600">
+                        {location.errorMessage}
+                      </div>
+                    )}
+
+                    {/* Try again */}
+                    {(location.status === "denied" ||
+                      location.status === "timed_out" ||
+                      location.status === "unavailable" ||
+                      location.status === "appError") && (
+                      <button
+                        type="button"
+                        onClick={useMyLocation}
+                        className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-100"
+                      >
+                        Try again
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Detected country confirmation prompt (no auto-switch) */}
+                {detectedIso2 && detectedIso2 !== selectedIso2 && (
+                  <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 space-y-2">
+                    <div className="font-semibold">
+                      Detected country: {detectedIso2}. Switch to it?
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIso2(detectedIso2);
+                          localStorage.setItem(STORAGE_MANUAL_KEY, "1"); // user-confirmed choice
+                          setDetectedIso2(null);
+                          setAutoSuggested(true);
+                          window.setTimeout(
+                            () => setAutoSuggested(false),
+                            2500,
+                          );
+                        }}
+                        className="flex-1 rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
+                      >
+                        Yes, switch
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDetectedIso2(null)}
+                        className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
+                      >
+                        No
+                      </button>
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      We’ll never change your country without asking.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {filteredCountries.length === 0 && (
@@ -847,9 +890,9 @@ export default function App() {
                 </div>
               )}
 
-              {error && (
+              {appError && (
                 <div className="rounded-2xl border border-red-200 bg-white p-3 space-y-2">
-                  <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-sm text-red-700">{appError}</p>
                   <button
                     type="button"
                     onClick={() => {
