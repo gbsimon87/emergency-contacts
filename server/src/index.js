@@ -4,14 +4,18 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import "dotenv/config";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
-import countries from "./data/countries.json" assert { type: "json" };
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const countries = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "./data/countries.json"), "utf8"),
+);
 
 app.use(express.json());
 
