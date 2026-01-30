@@ -31,7 +31,7 @@ It intentionally avoids technical jargon.
 
 - [x] React app created
 - [x] Tailwind CSS installed and working
-- [x] Basic UI renders correctly
+- [x] Mobile-first UI renders correctly
 - [x] Country picker works
 - [x] Country search works
 - [x] Last selected country is remembered
@@ -39,6 +39,13 @@ It intentionally avoids technical jargon.
 - [x] Confirm-before-call protection to avoid accidental dialing
 - [x] Copy all emergency numbers
 - [x] Share emergency numbers for the selected country
+- [x] Clear offline behavior (still usable with last-known data)
+- [x] Location detection is optional and never blocks the app
+- [x] Location permission states are shown accurately (granted / denied / timed out / unavailable)
+- [x] Country auto-detection never overrides the user without confirmation
+- [x] “What to say” micro-guidance included for each emergency service
+- [x] Nearby help options shown (hospitals + embassies/consulates) as read-only links
+- [x] First-aid micro-cards included as secondary guidance
 
 ### Backend (Server)
 
@@ -48,6 +55,9 @@ It intentionally avoids technical jargon.
 - [x] Read-only API endpoints return emergency numbers
   - [x] List countries: `/api/countries`
   - [x] Country details: `/api/countries/:iso2`
+- [x] Nearby facilities endpoint supported (read-only lookup)
+- [x] Server-side input validation for location-based requests (safe lat/lon + bounded radius)
+- [x] External API requests are guarded against failures (timeouts + safe fallbacks)
 
 ### Data
 
@@ -57,13 +67,24 @@ It intentionally avoids technical jargon.
 - [x] Metadata added to country data
   - [x] Data source (internal)
   - [x] Last verified date
+- [x] Server-side validation and normalization of country data
+- [x] Bad or incomplete data fails safely (no crashes, no broken call buttons)
 
-### Reliability
+### Reliability & Stress Reduction
 
 - [x] Graceful handling of network/API failures
 - [x] Clear error messaging with retry option
 - [x] Last-known emergency numbers remain visible during failures
-- [x] Server-side validation and normalization of country data
+- [x] Offline-friendly experience for repeat use (cache-based, read-only)
+- [x] No accounts, no setup, no distractions — fast access under stress
+
+### Security & Hardening
+
+- [x] Security headers enabled (baseline protection)
+- [x] Public endpoints protected with rate limiting
+- [x] CORS locked down intentionally (not open by default)
+- [x] Dependency audit performed and high-severity issues addressed
+- [x] External lookups protected against request storms (timeouts + caching)
 
 ### Deployment & Source Control
 
@@ -110,81 +131,16 @@ Everything added was optional, conservative, and designed to fail safely.
 
 ---
 
-## 🧭 Post–Phase 1 Roadmap (Ordered by Real User Value)
+## 🟣 Phase 3 — Security, Correctness & Hardening — Status: **Complete**
 
-These items are **not commitments**, but a prioritised guide for future work.  
-They are ordered by _impact in real emergencies_, not by technical interest.
-
-### 1. Offline-First Support (Highest Value)
-
-**Goal:** The app should still work when connectivity disappears.
-
-- [x] Cache last-used country and emergency numbers for offline use
-- [x] Clear offline indicator (“Using last saved data”)
-- [x] No background sync or complexity — read-only cache
-
-**Why this matters:** Emergencies often happen where connectivity is weak or unavailable.
-
-### 2. Automatic Location Detection (Optional, Fallback-Based)
-
-**Goal:** Reduce friction when the user is disoriented.
-
-- [x] Attempt to detect country automatically
-- [x] Always allow manual override
-- [x] Never block usage on location permission
-- [x] “Use my location” button (geolocation + reverse lookup)
-
-**Why this matters:** Helpful when it works, dangerous if it’s wrong — must be conservative.
-
-### 3. “What to Say” Micro-Guidance
-
-**Goal:** Help users communicate clearly under stress.
-
-- [x] Short checklist per service:
-  - “State emergency”
-  - “Give location”
-  - “Answer questions”
-- [ ] (Optional, later) Local-language phrases (only for top languages)
-
-**Why this matters:** Knowing _what to say_ can be as important as knowing _who to call_.
-
-### 4. Nearby Emergency Facilities (Read-Only)
-
-**Goal:** Provide secondary help options.
-
-- [x] Nearby hospitals
-- [x] Embassies / consulates
-- [x] Links only — no navigation logic
-
-**Why this matters:** Useful when calling isn’t enough or not possible.
-
-### 5. First-Aid Micro-Cards (Strictly Secondary)
-
-**Goal:** Immediate guidance while help is on the way.
-
-- [x] Bleeding
-- [x] Choking
-- [x] Unconscious / Not Responding
-- [x] CPR
-- [x] Heart Attack
-- [x] Stroke
-- [x] Seizure
-- [x] Severe Allergic Reaction
-
-**Why this matters:** High value, but only after calling is addressed.
-
----
-
-## 🟣 Phase 3 — Security, Correctness & Hardening (Planned)
-
-Phase 3 is about making the app **trustworthy under real-world conditions**:
+Phase 3 focused on making the app **trustworthy under real-world conditions**:
 
 - resistant to common web attacks
 - predictable when permissions are granted/denied
 - safe around third-party APIs
-- no “silent” breakage as the dataset grows
+- stable as the dataset grows
 
-This phase focuses on **fixing issues and reducing risk**, not adding features.
+This phase focused on **fixing issues and reducing risk**, not adding features.
 
 ---
 
@@ -257,37 +213,149 @@ As the dataset grows, mistakes will happen. The app must fail safely.
 
 ---
 
-### 4) Reliability & Error Handling Polish
+## 🧭 Next Roadmap (Ordered by Real User Value)
 
-**Goal:** No confusing dead-ends.
+These items are **not commitments**, but a prioritised guide for future work.  
+They are ordered by _impact in real emergencies_, not by technical interest.
 
-- [ ] Standardize error UI:
-  - [ ] network error vs permission error vs provider error
-  - [ ] consistent retry affordances
-- [ ] Add graceful degradation when third-party providers fail:
-  - [ ] Overpass down → show fallback copy + “Try again later”
-  - [ ] geocoder down → don’t treat as “permission denied”
-- [ ] Add minimal performance guards:
-  - [ ] avoid repeated background fetch loops
-  - [ ] dedupe identical nearby requests client-side
+### 1. Offline-First Support (Already Delivered)
 
-**Why this matters:**  
-Users in distress need clarity, not debugging.
+**Goal:** The app should still work when connectivity disappears.
+
+- [x] Cache last-used country and emergency numbers for offline use
+- [x] Clear offline indicator (“Using last saved data”)
+- [x] No background sync or complexity — read-only cache
+
+**Why this matters:** Emergencies often happen where connectivity is weak or unavailable.
+
+### 2. Automatic Location Detection (Already Delivered)
+
+**Goal:** Reduce friction when the user is disoriented.
+
+- [x] Attempt to detect country automatically
+- [x] Always allow manual override
+- [x] Never block usage on location permission
+- [x] “Use my location” button (geolocation + reverse lookup)
+
+**Why this matters:** Helpful when it works, dangerous if it’s wrong — must be conservative.
+
+### 3. “What to Say” Micro-Guidance (Already Delivered)
+
+**Goal:** Help users communicate clearly under stress.
+
+- [x] Short checklist per service:
+  - [x] “State emergency”
+  - [x] “Give location”
+  - [x] “Answer questions”
+- [ ] (Optional, later) Local-language phrases (only for top languages)
+
+**Why this matters:** Knowing _what to say_ can be as important as knowing _who to call_.
+
+### 4. Nearby Emergency Facilities (Already Delivered)
+
+**Goal:** Provide secondary help options.
+
+- [x] Nearby hospitals
+- [x] Embassies / consulates
+- [x] Links only — no navigation logic
+
+**Why this matters:** Useful when calling isn’t enough or not possible.
+
+### 5. First-Aid Micro-Cards (Already Delivered)
+
+**Goal:** Immediate guidance while help is on the way.
+
+- [x] Bleeding
+- [x] Choking
+- [x] Unconscious / Not Responding
+- [x] CPR
+- [x] Heart Attack
+- [x] Stroke
+- [x] Seizure
+- [x] Severe Allergic Reaction
+
+**Why this matters:** High value, but only after calling is addressed.
 
 ---
 
-### 5) Observability (Lightweight)
+## 🔵 Phase 4 — Personal Safety & Offline Readiness (Planned)
 
-**Goal:** Identify breakage quickly without collecting sensitive data.
+Phase 4 focuses on **helping others help the user** — especially when the user is injured, panicked, or unable to interact normally.
 
-- [ ] Add structured server logs for failures (no PII)
-- [ ] Add a simple “diagnostic mode” (local/dev only):
-  - [ ] show permission state
-  - [ ] show last successful fetch timestamps
-- [ ] Add uptime/health checks for `/api/health` (Render monitoring)
+These features prioritize **offline access, clarity, and trust**, not automation or complexity.
+
+---
+
+### 1) Personal Emergency Contacts (ICE) — Highest Priority
+
+**Goal:** Allow responders or bystanders to contact someone the user trusts.
+
+- [ ] Add personal emergency contacts (“ICE”):
+  - [ ] Name
+  - [ ] Phone number
+  - [ ] Relationship (optional)
+- [ ] One-tap call buttons
+- [ ] Clear separation from emergency services
+- [ ] Fully available offline
+- [ ] Stored locally by default (account sync optional later)
 
 **Why this matters:**  
-You can’t fix what you can’t see — but we also avoid tracking users.
+Emergency services aren’t always enough. Reaching a trusted person can be critical.
+
+---
+
+### 2) Emergency Info Card (Lock-Screen Friendly)
+
+**Goal:** Provide critical personal information when the user cannot speak.
+
+- [ ] Single emergency info card:
+  - [ ] Name (optional)
+  - [ ] Home country (optional)
+  - [ ] ICE contacts
+  - [ ] Medical notes (allergies, conditions, medications)
+- [ ] One-tap “Show full screen”
+- [ ] One-tap “Share”
+- [ ] Works completely offline
+- [ ] Clear disclaimer: user-provided information only
+
+**Why this matters:**  
+This information is often needed when the user is least able to provide it.
+
+---
+
+### 3) Offline Emergency Mode
+
+**Goal:** Make offline usage explicit, calm, and reliable.
+
+- [ ] Dedicated emergency-focused view
+- [ ] Clearly indicates offline state without alarm
+- [ ] Prioritizes offline-safe features:
+  - [ ] Emergency numbers
+  - [ ] ICE contacts
+  - [ ] Emergency info card
+- [ ] No background sync or retry loops
+- [ ] No blocking states caused by connectivity loss
+
+**Why this matters:**  
+Emergencies are chaotic. The app must feel stable even when the network is not.
+
+---
+
+### Phase 4 Summary (Plain English)
+
+> Even if the user:
+>
+> - has no internet
+> - cannot speak clearly
+> - cannot navigate complex UI
+>
+> The app still helps others:
+>
+> - know who to call
+> - understand basic medical context
+> - take the next correct step calmly
+
+Phase 4 strengthens the app’s role as a **personal safety tool**, not just an information lookup.
 
 ---
 
