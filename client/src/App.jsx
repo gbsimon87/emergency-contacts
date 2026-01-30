@@ -122,6 +122,19 @@ function WhatToSayAll({ defaultService = "general" }) {
 function FirstAidGuidance() {
   const cards = [
     {
+      key: "allergic-reaction",
+      title: "Severe Allergic Reaction",
+      priority: "Call first, then act",
+      tone: "call",
+      steps: [
+        "Call emergency services immediately.",
+        "Use an epinephrine auto-injector if available.",
+        "Lay the person flat and raise their legs if possible.",
+        "If breathing is difficult, help them sit up.",
+      ],
+      note: "If in doubt, use the injector and call for help.",
+    },
+    {
       key: "bleeding",
       title: "Bleeding",
       priority: "Call first, then act",
@@ -146,20 +159,6 @@ function FirstAidGuidance() {
         "Call emergency services as soon as possible.",
       ],
       note: "If unsure, act and call for help.",
-    },
-    {
-      key: "unresponsive",
-      title: "Unconscious / Not Responding",
-      priority: "Call first, then act",
-      tone: "call",
-      steps: [
-        "Check if the person responds when you speak or tap them.",
-        "Call emergency services immediately.",
-        "Check if they are breathing.",
-        "If breathing, place them on their side.",
-        "If not breathing, start CPR.",
-      ],
-      note: "Do not leave the person alone.",
     },
     {
       key: "cpr",
@@ -188,19 +187,6 @@ function FirstAidGuidance() {
       note: "Chest pain, pressure, or discomfort can be serious.",
     },
     {
-      key: "stroke",
-      title: "Stroke",
-      priority: "Call first",
-      tone: "call",
-      steps: [
-        "Check for face drooping.",
-        "Ask them to raise both arms.",
-        "Listen for slurred or unclear speech.",
-        "Call emergency services immediately.",
-      ],
-      note: "Act fast — early treatment saves lives.",
-    },
-    {
       key: "seizure",
       title: "Seizure",
       priority: "Act first, then call",
@@ -215,25 +201,61 @@ function FirstAidGuidance() {
       note: "Stay calm and stay with them.",
     },
     {
-      key: "allergic-reaction",
-      title: "Severe Allergic Reaction",
+      key: "stroke",
+      title: "Stroke",
+      priority: "Call first",
+      tone: "call",
+      steps: [
+        "Check for face drooping.",
+        "Ask them to raise both arms.",
+        "Listen for slurred or unclear speech.",
+        "Call emergency services immediately.",
+      ],
+      note: "Act fast — early treatment saves lives.",
+    },
+    {
+      key: "unresponsive",
+      title: "Unconscious / Not Responding",
       priority: "Call first, then act",
       tone: "call",
       steps: [
+        "Check if the person responds when you speak or tap them.",
         "Call emergency services immediately.",
-        "Use an epinephrine auto-injector if available.",
-        "Lay the person flat and raise their legs if possible.",
-        "If breathing is difficult, help them sit up.",
+        "Check if they are breathing.",
+        "If breathing, place them on their side.",
+        "If not breathing, start CPR.",
       ],
-      note: "If in doubt, use the injector and call for help.",
+      note: "Do not leave the person alone.",
     },
   ];
 
-  function badgeClasses(tone) {
-    if (tone === "act") {
-      return "border-amber-200 bg-amber-50 text-amber-900";
+  // alphabetical by title
+  const sorted = [...cards].sort((a, b) => a.title.localeCompare(b.title));
+
+  const [activeKey, setActiveKey] = useState(sorted[0]?.key || "");
+
+  // keep activeKey valid if the list changes (defensive, but nice)
+  useEffect(() => {
+    if (!sorted.length) return;
+    if (!activeKey || !sorted.some((c) => c.key === activeKey)) {
+      setActiveKey(sorted[0].key);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorted.length]);
+
+  const active = sorted.find((c) => c.key === activeKey) || sorted[0];
+
+  function badgeClasses(tone) {
+    if (tone === "act") return "border-amber-200 bg-amber-50 text-amber-900";
     return "border-red-200 bg-red-50 text-red-900";
+  }
+
+  function tabLabel(title) {
+    // small tabs: short, readable
+    // "Severe Allergic Reaction" -> "Allergic reaction"
+    if (title.toLowerCase().includes("allergic")) return "Allergic reaction";
+    if (title.toLowerCase().includes("unconscious")) return "Unconscious";
+    return title;
   }
 
   return (
@@ -257,38 +279,57 @@ function FirstAidGuidance() {
           </div>
         </summary>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {cards.map((c) => (
-            <div
-              key={c.key}
-              className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="text-sm font-semibold text-slate-900">
-                  {c.title}
-                </div>
-                <span
-                  className={[
-                    "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
-                    badgeClasses(c.tone),
-                  ].join(" ")}
-                >
-                  {c.priority}
-                </span>
-              </div>
-
-              <ol className="mt-3 list-decimal pl-5 space-y-1.5 text-xs text-slate-700">
-                {c.steps.map((s, idx) => (
-                  <li key={idx}>{s}</li>
-                ))}
-              </ol>
-
-              <div className="mt-3 text-[11px] text-slate-600">
-                <span className="font-semibold">Reminder:</span> {c.note}
-              </div>
-            </div>
-          ))}
+        {/* Tabs */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {sorted.map((c) => {
+            const activeTab = c.key === activeKey;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => setActiveKey(c.key)}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold transition",
+                  "border",
+                  activeTab
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100",
+                ].join(" ")}
+              >
+                {tabLabel(c.title)}
+              </button>
+            );
+          })}
         </div>
+
+        {/* Active content */}
+        {active && (
+          <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-start justify-between gap-2">
+              <div className="text-sm font-semibold text-slate-900">
+                {active.title}
+              </div>
+              <span
+                className={[
+                  "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                  badgeClasses(active.tone),
+                ].join(" ")}
+              >
+                {active.priority}
+              </span>
+            </div>
+
+            <ol className="mt-3 list-decimal pl-5 space-y-1.5 text-xs text-slate-700">
+              {active.steps.map((s, idx) => (
+                <li key={idx}>{s}</li>
+              ))}
+            </ol>
+
+            <div className="mt-3 text-[11px] text-slate-600">
+              <span className="font-semibold">Reminder:</span> {active.note}
+            </div>
+          </div>
+        )}
 
         <div className="mt-3 text-[11px] text-slate-500">
           This is not medical training. If you are unsure, prioritize calling
@@ -1316,9 +1357,23 @@ export default function App() {
             {/* Footer */}
             <footer className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
               <p className="text-sm font-semibold">Disclaimer</p>
+
               <p className="mt-1 text-sm text-slate-600">
-                If it's safe to do so, double-check you selected the correct
-                country before calling.
+                This app is provided for informational purposes only. Emergency
+                numbers, guidance, and nearby results may be incomplete,
+                outdated, or incorrect.
+              </p>
+
+              <p className="mt-2 text-sm text-slate-600">
+                We do not provide medical, legal, or emergency services, and we
+                are not responsible for any outcomes, delays, errors, or actions
+                taken based on the information shown here.
+              </p>
+
+              <p className="mt-2 text-sm text-slate-600">
+                Always use your own judgment and, if possible, verify critical
+                information with local authorities or official sources before
+                acting.
               </p>
             </footer>
           </div>
