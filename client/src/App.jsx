@@ -7,7 +7,9 @@ const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
 const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
 const STORAGE_MANUAL_KEY = "ec_country_manually_set";
 
-function WhatToSay({ service }) {
+function WhatToSayAll({ defaultService = "general" }) {
+  const [service, setService] = useState(defaultService);
+
   const labels = {
     general: "General Emergency",
     police: "Police",
@@ -29,43 +31,89 @@ function WhatToSay({ service }) {
     fire: "A building / vehicle / area is on fire.",
   };
 
+  const options = [
+    { key: "general", label: "General" },
+    { key: "police", label: "Police" },
+    { key: "ambulance", label: "Ambulance" },
+    { key: "fire", label: "Fire" },
+  ];
+
   return (
-    <details className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-      <summary className="cursor-pointer select-none text-xs font-semibold text-slate-700 hover:underline focus:outline-none">
-        What should I say?
+    <details className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <summary className="cursor-pointer select-none focus:outline-none">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-slate-900">
+              What should I say?
+            </div>
+            <div className="mt-1 text-xs text-slate-500">
+              Quick scripts you can read out loud.
+            </div>
+          </div>
+
+          <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+            View
+          </span>
+        </div>
       </summary>
 
-      <div className="mt-2 space-y-2 text-xs text-slate-700">
-        <div className="font-semibold">
-          Quick script for {labels[service] || "emergency"}:
+      <div className="mt-4">
+        {/* Service switcher */}
+        <div className="flex flex-wrap gap-2">
+          {options.map((o) => {
+            const active = o.key === service;
+            return (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => setService(o.key)}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold transition",
+                  "border",
+                  active
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100",
+                ].join(" ")}
+              >
+                {o.label}
+              </button>
+            );
+          })}
         </div>
 
-        <ol className="list-decimal pl-5 space-y-1">
-          <li>
-            Say the emergency clearly:{" "}
-            <span className="font-semibold">“{firstLine[service]}”</span>
-          </li>
-          <li>
-            Give your location:{" "}
-            <span className="font-semibold">
-              address, landmark, or nearby place
-            </span>
-          </li>
-          <li>
-            Describe what's happening:{" "}
-            <span className="font-semibold">{example[service]}</span>
-          </li>
-          <li>Answer questions and stay on the line.</li>
-          <li>
-            If you can't speak:{" "}
-            <span className="font-semibold">“Please send help.”</span>
-          </li>
-        </ol>
+        {/* Script */}
+        <div className="mt-4 space-y-2 text-xs text-slate-700">
+          <div className="font-semibold">
+            Quick script for {labels[service] || "emergency"}:
+          </div>
 
-        <p className="text-[11px] text-slate-500">
-          Tip: If English isn't understood, repeat the service name (police /
-          ambulance / fire) and your location slowly.
-        </p>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>
+              Say the emergency clearly:{" "}
+              <span className="font-semibold">“{firstLine[service]}”</span>
+            </li>
+            <li>
+              Give your location:{" "}
+              <span className="font-semibold">
+                address, landmark, or nearby place
+              </span>
+            </li>
+            <li>
+              Describe what's happening:{" "}
+              <span className="font-semibold">{example[service]}</span>
+            </li>
+            <li>Answer questions and stay on the line.</li>
+            <li>
+              If you can't speak:{" "}
+              <span className="font-semibold">“Please send help.”</span>
+            </li>
+          </ol>
+
+          <p className="text-[11px] text-slate-500">
+            Tip: If English isn't understood, repeat the service name (police /
+            ambulance / fire) and your location slowly.
+          </p>
+        </div>
       </div>
     </details>
   );
@@ -276,6 +324,23 @@ function safeHttpUrl(value) {
   }
 
   return null;
+}
+
+function primaryNumber(value) {
+  if (!value) return "";
+  if (Array.isArray(value)) return value[0] || "";
+  return value;
+}
+
+function confirmAndCall(label, number) {
+  const n = primaryNumber(number);
+  const telHref = safeTelHref(n);
+  if (!telHref) return;
+
+  const ok = window.confirm(`Call ${label}: ${n}?`);
+  if (ok) {
+    window.location.href = telHref;
+  }
 }
 
 function SingleCallButton({ label, number, badge }) {
@@ -703,7 +768,7 @@ export default function App() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+      <div className="mx-auto max-w-5xl px-4 py-8 pb-28 sm:py-10 md:pb-10">
         {/* Top header bar */}
         <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
@@ -825,44 +890,64 @@ export default function App() {
                   </div>
                 )}
 
-                {/* Location status (truthful state machine) */}
+                {/* Location status (lighter UI) */}
                 {location.status !== "not_requested" && (
-                  <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 space-y-1">
-                    <div>
-                      <span className="font-semibold">Location status:</span>{" "}
-                      {location.status === "requesting"
-                        ? "Requesting…"
-                        : location.status === "granted"
-                          ? "Granted"
-                          : location.status === "denied"
-                            ? "Denied"
-                            : location.status === "timed_out"
-                              ? "Timed out"
-                              : location.status === "unavailable"
-                                ? "Unavailable"
-                                : "Error"}
-                    </div>
+                  <>
+                    {/* If granted AND no error, show a tiny success line */}
+                    {location.status === "granted" && !location.errorMessage ? (
+                      <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-600">
+                        <span
+                          className="inline-block h-2 w-2 rounded-full bg-emerald-500"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          <span className="font-semibold text-slate-700">
+                            Location enabled
+                          </span>{" "}
+                          — you can use Nearby help.
+                        </span>
+                      </div>
+                    ) : (
+                      /* Otherwise show the full status box (not granted OR has an error) */
+                      <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 space-y-1">
+                        <div>
+                          <span className="font-semibold">
+                            Location status:
+                          </span>{" "}
+                          {location.status === "requesting"
+                            ? "Requesting…"
+                            : location.status === "granted"
+                              ? "Granted"
+                              : location.status === "denied"
+                                ? "Denied"
+                                : location.status === "timed_out"
+                                  ? "Timed out"
+                                  : location.status === "unavailable"
+                                    ? "Unavailable"
+                                    : "Error"}
+                        </div>
 
-                    {location.errorMessage && (
-                      <div className="text-[11px] text-slate-600">
-                        {location.errorMessage}
+                        {location.errorMessage && (
+                          <div className="text-[11px] text-slate-600">
+                            {location.errorMessage}
+                          </div>
+                        )}
+
+                        {(location.status === "denied" ||
+                          location.status === "timed_out" ||
+                          location.status === "unavailable" ||
+                          location.status === "error") && (
+                          <button
+                            type="button"
+                            onClick={useMyLocation}
+                            className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-100"
+                          >
+                            Try again
+                          </button>
+                        )}
                       </div>
                     )}
-
-                    {/* Try again */}
-                    {(location.status === "denied" ||
-                      location.status === "timed_out" ||
-                      location.status === "unavailable" ||
-                      location.status === "error") && (
-                      <button
-                        type="button"
-                        onClick={useMyLocation}
-                        className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-100"
-                      >
-                        Try again
-                      </button>
-                    )}
-                  </div>
+                  </>
                 )}
 
                 {/* Detected country confirmation prompt (no auto-switch) */}
@@ -1018,24 +1103,22 @@ export default function App() {
                     label="General Emergency"
                     number={services.general}
                   />
-                  <WhatToSay service="general" />
                 </div>
 
                 <div>
                   <CallButton label="Police" number={services.police} />
-                  <WhatToSay service="police" />
                 </div>
 
                 <div>
                   <CallButton label="Ambulance" number={services.ambulance} />
-                  <WhatToSay service="ambulance" />
                 </div>
 
                 <div>
                   <CallButton label="Fire" number={services.fire} />
-                  <WhatToSay service="fire" />
                 </div>
               </div>
+
+              <WhatToSayAll defaultService="general" />
             </section>
 
             {/* Nearby help section */}
@@ -1241,6 +1324,61 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky call bar */}
+      {selectedCountry && (
+        <div className="md:hidden fixed inset-x-0 bottom-0 z-50">
+          <div className="mx-auto max-w-5xl px-4 pb-4">
+            <div className="rounded-3xl border border-slate-200/70 bg-white shadow-lg px-3 py-2">
+              <div className="grid grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    confirmAndCall("General Emergency", services.general)
+                  }
+                  disabled={!safeTelHref(primaryNumber(services.general))}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 text-center text-[11px] font-semibold text-slate-800 disabled:opacity-50"
+                >
+                  General
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => confirmAndCall("Police", services.police)}
+                  disabled={!safeTelHref(primaryNumber(services.police))}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 text-center text-[11px] font-semibold text-slate-800 disabled:opacity-50"
+                >
+                  Police
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    confirmAndCall("Ambulance", services.ambulance)
+                  }
+                  disabled={!safeTelHref(primaryNumber(services.ambulance))}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 text-center text-[11px] font-semibold text-slate-800 disabled:opacity-50"
+                >
+                  Ambulance
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => confirmAndCall("Fire", services.fire)}
+                  disabled={!safeTelHref(primaryNumber(services.fire))}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 text-center text-[11px] font-semibold text-slate-800 disabled:opacity-50"
+                >
+                  Fire
+                </button>
+              </div>
+
+              <div className="mt-1 text-center text-[10px] text-slate-500">
+                Quick call — confirmation required
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
