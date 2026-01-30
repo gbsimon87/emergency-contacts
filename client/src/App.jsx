@@ -585,38 +585,138 @@ function loadInfoCard() {
     const raw = localStorage.getItem(INFO_CARD_STORAGE_KEY);
     if (!raw) {
       return {
-        version: 1,
+        version: 2,
         fullName: "",
         homeCountryIso2: "",
+        primaryLanguage: "",
+        primaryLanguageOther: "",
+        bloodType: "unknown", // unknown | A+ | A- | ... | other
+        bloodTypeOther: "",
+        allergies: [], // array of keys
+        allergiesOther: "",
+        conditions: [], // array of keys
+        conditionsOther: "",
+        medications: "",
         medicalNotes: "",
       };
     }
+
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.version === 1) {
+
+    // v2
+    if (parsed && parsed.version === 2) {
       return {
-        version: 1,
+        version: 2,
         fullName: typeof parsed.fullName === "string" ? parsed.fullName : "",
         homeCountryIso2:
           typeof parsed.homeCountryIso2 === "string"
             ? parsed.homeCountryIso2
             : "",
+        primaryLanguage:
+          typeof parsed.primaryLanguage === "string"
+            ? parsed.primaryLanguage
+            : "",
+        primaryLanguageOther:
+          typeof parsed.primaryLanguageOther === "string"
+            ? parsed.primaryLanguageOther
+            : "",
+        bloodType:
+          typeof parsed.bloodType === "string" ? parsed.bloodType : "unknown",
+        bloodTypeOther:
+          typeof parsed.bloodTypeOther === "string"
+            ? parsed.bloodTypeOther
+            : "",
+        allergies: Array.isArray(parsed.allergies) ? parsed.allergies : [],
+        allergiesOther:
+          typeof parsed.allergiesOther === "string"
+            ? parsed.allergiesOther
+            : "",
+        conditions: Array.isArray(parsed.conditions) ? parsed.conditions : [],
+        conditionsOther:
+          typeof parsed.conditionsOther === "string"
+            ? parsed.conditionsOther
+            : "",
+        medications:
+          typeof parsed.medications === "string" ? parsed.medications : "",
         medicalNotes:
           typeof parsed.medicalNotes === "string" ? parsed.medicalNotes : "",
       };
     }
-    return { version: 1, fullName: "", homeCountryIso2: "", medicalNotes: "" };
+
+    // v1 -> migrate
+    if (parsed && parsed.version === 1) {
+      return {
+        version: 2,
+        fullName: typeof parsed.fullName === "string" ? parsed.fullName : "",
+        homeCountryIso2:
+          typeof parsed.homeCountryIso2 === "string"
+            ? parsed.homeCountryIso2
+            : "",
+        primaryLanguage: "",
+        primaryLanguageOther: "",
+        bloodType: "unknown",
+        bloodTypeOther: "",
+        allergies: [],
+        allergiesOther: "",
+        conditions: [],
+        conditionsOther: "",
+        medications: "",
+        medicalNotes:
+          typeof parsed.medicalNotes === "string" ? parsed.medicalNotes : "",
+      };
+    }
+
+    return {
+      version: 2,
+      fullName: "",
+      homeCountryIso2: "",
+      primaryLanguage: "",
+      primaryLanguageOther: "",
+      bloodType: "unknown",
+      bloodTypeOther: "",
+      allergies: [],
+      allergiesOther: "",
+      conditions: [],
+      conditionsOther: "",
+      medications: "",
+      medicalNotes: "",
+    };
   } catch {
-    return { version: 1, fullName: "", homeCountryIso2: "", medicalNotes: "" };
+    return {
+      version: 2,
+      fullName: "",
+      homeCountryIso2: "",
+      primaryLanguage: "",
+      primaryLanguageOther: "",
+      bloodType: "unknown",
+      bloodTypeOther: "",
+      allergies: [],
+      allergiesOther: "",
+      conditions: [],
+      conditionsOther: "",
+      medications: "",
+      medicalNotes: "",
+    };
   }
 }
 
 function saveInfoCard(info) {
   const payload = {
-    version: 1,
+    version: 2,
     fullName: info.fullName || "",
     homeCountryIso2: info.homeCountryIso2 || "",
+    primaryLanguage: info.primaryLanguage || "",
+    primaryLanguageOther: info.primaryLanguageOther || "",
+    bloodType: info.bloodType || "unknown",
+    bloodTypeOther: info.bloodTypeOther || "",
+    allergies: Array.isArray(info.allergies) ? info.allergies : [],
+    allergiesOther: info.allergiesOther || "",
+    conditions: Array.isArray(info.conditions) ? info.conditions : [],
+    conditionsOther: info.conditionsOther || "",
+    medications: info.medications || "",
     medicalNotes: info.medicalNotes || "",
   };
+
   localStorage.setItem(INFO_CARD_STORAGE_KEY, JSON.stringify(payload));
 }
 
@@ -674,7 +774,7 @@ function confirmAndCall(label, number) {
   }
 }
 
-function ICEContacts({ contacts, setContacts }) {
+function EmergencyContacts({ contacts, setContacts }) {
   const [adding, setAdding] = useState(false);
 
   const [name, setName] = useState("");
@@ -718,7 +818,7 @@ function ICEContacts({ contacts, setContacts }) {
     const label = c
       ? `${c.name}${c.relationship ? ` (${c.relationship})` : ""}`
       : "this contact";
-    const ok = window.confirm(`Remove Emergency Contacts contact: ${label}?`);
+    const ok = window.confirm(`Remove emergency contact: ${label}?`);
     if (!ok) return;
 
     setContacts((prev) => prev.filter((x) => x.id !== id));
@@ -728,119 +828,138 @@ function ICEContacts({ contacts, setContacts }) {
     const href = safeTelHref(c.phone);
     if (!href) return;
 
-    const label = `Emergency Contacts — ${c.name}${c.relationship ? ` (${c.relationship})` : ""}`;
+    const label = `${c.name}${c.relationship ? ` (${c.relationship})` : ""}`;
     const ok = window.confirm(`Call ${label}: ${c.phone}?`);
     if (!ok) return;
 
     window.location.assign(href);
   }
 
+  const count = contacts?.length || 0;
+
   return (
-    <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+    <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm">
       <details className="group">
-        <summary className="cursor-pointer select-none focus:outline-none">
+        <summary className="cursor-pointer select-none focus:outline-none px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-sm font-semibold text-slate-900">
-                Emergency Contacts
-              </div>
-              <div className="mt-1 text-xs text-slate-500">
-                Personal emergency contacts (stored on this device).
-              </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Emergency contacts
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">
+                People you trust (stored on this device).
+              </p>
             </div>
 
-            <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-              Emergency Contacts
-            </span>
+            <div className="shrink-0 flex items-center gap-2">
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                {count} {count === 1 ? "saved" : "saved"}
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                View
+              </span>
+            </div>
           </div>
         </summary>
 
-        {/* Empty state */}
-        {contacts.length === 0 && !adding && (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <p className="text-sm text-slate-700">No Emergency Contacts yet.</p>
-            <p className="mt-1 text-[11px] text-slate-500">
-              Add someone you trust so responders can call them if needed.
-            </p>
+        <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+          {/* Empty state */}
+          {count === 0 && !adding && (
+            <div className="mt-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-semibold text-slate-900">
+                No contacts yet
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                Add someone responders can call if needed.
+              </p>
 
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                className="mt-3 w-full rounded-2xl bg-slate-900 text-white px-3 py-2.5 text-sm font-semibold hover:opacity-90
+                           focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
+              >
+                Add a contact
+              </button>
+            </div>
+          )}
+
+          {/* List */}
+          {count > 0 && (
+            <ul className="mt-2 space-y-2">
+              {contacts.map((c) => {
+                const href = safeTelHref(c.phone);
+                const disabled = !href;
+
+                return (
+                  <li
+                    key={c.id}
+                    className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-slate-900 truncate">
+                          {c.name}
+                        </div>
+
+                        <div className="mt-1 text-sm text-slate-700">
+                          {c.phone}
+                        </div>
+
+                        {c.relationship ? (
+                          <div className="mt-0.5 text-[11px] text-slate-500">
+                            {c.relationship}
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="shrink-0 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => callContact(c)}
+                          disabled={disabled}
+                          className={[
+                            "rounded-full px-3 py-1.5 text-xs font-semibold",
+                            disabled
+                              ? "border border-slate-200 bg-white text-slate-400"
+                              : "bg-slate-900 text-white hover:opacity-90",
+                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20",
+                          ].join(" ")}
+                        >
+                          Call
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => removeContact(c.id)}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100
+                                     focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {/* Add form trigger */}
+          {!adding && count > 0 && (
             <button
               type="button"
               onClick={() => setAdding(true)}
-              className="mt-3 w-full rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
+              className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold hover:bg-slate-50
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
             >
-              Add Emergency Contacts contact
-            </button>
-          </div>
-        )}
-
-        {/* List */}
-        {contacts.length > 0 && (
-          <ul className="mt-4 space-y-2">
-            {contacts.map((c) => {
-              const href = safeTelHref(c.phone);
-              const disabled = !href;
-
-              return (
-                <li
-                  key={c.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">
-                        {c.name}
-                      </div>
-
-                      <div className="mt-0.5 text-xs text-slate-600">
-                        {c.relationship ? `${c.relationship} • ` : ""}
-                        {c.phone}
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => callContact(c)}
-                        disabled={disabled}
-                        className={[
-                          "rounded-full px-3 py-1 text-xs font-semibold",
-                          disabled
-                            ? "border border-slate-200 bg-white text-slate-400"
-                            : "bg-slate-900 text-white hover:opacity-90",
-                        ].join(" ")}
-                      >
-                        Call
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => removeContact(c.id)}
-                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {/* Add form */}
-        <div className="mt-4">
-          {!adding && contacts.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
-            >
-              Add another Emergency Contacts contact
+              Add another contact
             </button>
           )}
 
+          {/* Add form */}
           {adding && (
-            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
+            <div className="mt-3 rounded-3xl border border-slate-200 bg-white p-4 space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-1">
                   <label className="block text-[11px] font-semibold text-slate-700">
@@ -850,7 +969,8 @@ function ICEContacts({ contacts, setContacts }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Sarah Jones"
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 </div>
 
@@ -862,7 +982,8 @@ function ICEContacts({ contacts, setContacts }) {
                     value={relationship}
                     onChange={(e) => setRelationship(e.target.value)}
                     placeholder="e.g. Partner, Parent"
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                 </div>
 
@@ -875,7 +996,8 @@ function ICEContacts({ contacts, setContacts }) {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +44 7..."
                     inputMode="tel"
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-slate-900/15"
                   />
                   {!phone.trim() ? null : !phoneHref ? (
                     <p className="mt-1 text-[11px] text-red-600">
@@ -895,10 +1017,11 @@ function ICEContacts({ contacts, setContacts }) {
                   onClick={addContact}
                   disabled={!name.trim() || !safeTelHref(phone)}
                   className={[
-                    "flex-1 rounded-2xl px-3 py-2 text-xs font-semibold",
+                    "flex-1 rounded-2xl px-3 py-2.5 text-sm font-semibold",
                     !name.trim() || !safeTelHref(phone)
                       ? "border border-slate-200 bg-slate-50 text-slate-400"
                       : "bg-slate-900 text-white hover:opacity-90",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20",
                   ].join(" ")}
                 >
                   Save contact
@@ -910,15 +1033,15 @@ function ICEContacts({ contacts, setContacts }) {
                     resetForm();
                     setAdding(false);
                   }}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold hover:bg-slate-50
+                             focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
                 >
                   Cancel
                 </button>
               </div>
 
               <p className="text-[11px] text-slate-500">
-                Stored on this device. In a future update, you’ll be able to
-                sync contacts by signing in.
+                Stored on this device.
               </p>
             </div>
           )}
@@ -1043,18 +1166,81 @@ function mapsLink(lat, lon) {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 }
 
-function EmergencyInfoCard({ countries, emergencyContacts }) {
+function EmergencyInfoCard({ countries, emergencyContacts, mode = "normal" }) {
   const [info, setInfo] = useState(() => loadInfoCard());
   const [fullScreen, setFullScreen] = useState(false);
 
-  useEffect(() => {
-    saveInfoCard(info);
-  }, [info]);
+  const languageOptions = [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Italian",
+    "Arabic",
+    "Hindi",
+    "Portuguese",
+    "Mandarin",
+    "Japanese",
+    "Korean",
+    "Other",
+  ];
+
+  const bloodTypeOptions = [
+    { value: "unknown", label: "Unknown" },
+    { value: "A+", label: "A+" },
+    { value: "A-", label: "A-" },
+    { value: "B+", label: "B+" },
+    { value: "B-", label: "B-" },
+    { value: "AB+", label: "AB+" },
+    { value: "AB-", label: "AB-" },
+    { value: "O+", label: "O+" },
+    { value: "O-", label: "O-" },
+    { value: "other", label: "Other" },
+  ];
+
+  const allergyOptions = [
+    { key: "penicillin", label: "Penicillin" },
+    { key: "latex", label: "Latex" },
+    { key: "nuts", label: "Nuts" },
+    { key: "shellfish", label: "Shellfish" },
+    { key: "bee", label: "Bee stings" },
+    { key: "contrast", label: "Contrast dye" },
+    { key: "other", label: "Other" },
+  ];
+
+  const conditionOptions = [
+    { key: "asthma", label: "Asthma" },
+    { key: "diabetes", label: "Diabetes" },
+    { key: "epilepsy", label: "Epilepsy / seizures" },
+    { key: "heart", label: "Heart condition" },
+    { key: "bloodThinners", label: "On blood thinners" },
+    { key: "pregnant", label: "Pregnant" },
+    { key: "other", label: "Other" },
+  ];
+
+  function toggleInArray(arr, key) {
+    const set = new Set(Array.isArray(arr) ? arr : []);
+    if (set.has(key)) set.delete(key);
+    else set.add(key);
+    return Array.from(set);
+  }
+
+  function joinLabels(keys, options) {
+    const map = new Map(options.map((o) => [o.key, o.label]));
+    return (keys || [])
+      .map((k) => map.get(k))
+      .filter(Boolean)
+      .join(", ");
+  }
 
   const homeCountry =
     info.homeCountryIso2 && Array.isArray(countries)
       ? countries.find((c) => c.iso2 === info.homeCountryIso2)
       : null;
+
+  useEffect(() => {
+    saveInfoCard(info);
+  }, [info]);
 
   function buildShareText() {
     const lines = [];
@@ -1063,15 +1249,52 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
 
     if (info.fullName.trim()) lines.push(`Name: ${info.fullName.trim()}`);
 
-    if (homeCountry) {
-      lines.push(`Home country: ${homeCountry.name}`);
-    } else if (info.homeCountryIso2.trim()) {
+    if (homeCountry) lines.push(`Home country: ${homeCountry.name}`);
+    else if (info.homeCountryIso2.trim())
       lines.push(`Home country: ${info.homeCountryIso2.trim()}`);
+
+    // Language
+    const lang =
+      info.primaryLanguage === "Other"
+        ? info.primaryLanguageOther?.trim()
+        : info.primaryLanguage?.trim();
+    if (lang) lines.push(`Language: ${lang}`);
+
+    // Medical
+    const blood =
+      info.bloodType === "other"
+        ? info.bloodTypeOther?.trim()
+        : info.bloodType === "unknown"
+          ? ""
+          : info.bloodType;
+    if (blood) lines.push(`Blood type: ${blood}`);
+
+    const allergies = joinLabels(info.allergies, allergyOptions);
+    if (allergies || info.allergiesOther?.trim()) {
+      const other = info.allergies?.includes("other")
+        ? info.allergiesOther?.trim()
+        : "";
+      lines.push(
+        `Allergies: ${[allergies, other].filter(Boolean).join(allergies && other ? ", " : "")}`,
+      );
     }
+
+    const conditions = joinLabels(info.conditions, conditionOptions);
+    if (conditions || info.conditionsOther?.trim()) {
+      const other = info.conditions?.includes("other")
+        ? info.conditionsOther?.trim()
+        : "";
+      lines.push(
+        `Conditions: ${[conditions, other].filter(Boolean).join(conditions && other ? ", " : "")}`,
+      );
+    }
+
+    if (info.medications?.trim())
+      lines.push(`Medications: ${info.medications.trim()}`);
 
     if (emergencyContacts?.length) {
       lines.push("");
-      lines.push("Emergency Contacts:");
+      lines.push("Emergency contacts:");
       for (const c of emergencyContacts) {
         const rel = c.relationship ? ` (${c.relationship})` : "";
         lines.push(`- ${c.name}${rel}: ${c.phone}`);
@@ -1080,7 +1303,7 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
 
     if (info.medicalNotes.trim()) {
       lines.push("");
-      lines.push("Medical notes:");
+      lines.push("Additional notes:");
       lines.push(info.medicalNotes.trim());
     }
 
@@ -1111,9 +1334,18 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
     if (!ok) return;
 
     setInfo({
-      version: 1,
+      version: 2,
       fullName: "",
       homeCountryIso2: "",
+      primaryLanguage: "",
+      primaryLanguageOther: "",
+      bloodType: "unknown",
+      bloodTypeOther: "",
+      allergies: [],
+      allergiesOther: "",
+      conditions: [],
+      conditionsOther: "",
+      medications: "",
       medicalNotes: "",
     });
   }
@@ -1123,6 +1355,42 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
     const valueSize = large ? "text-lg sm:text-xl" : "text-sm";
     const sectionTitle = large ? "text-base sm:text-lg" : "text-xs";
     const subtle = large ? "text-sm" : "text-[11px]";
+
+    const lang =
+      info.primaryLanguage === "Other"
+        ? info.primaryLanguageOther?.trim()
+        : info.primaryLanguage?.trim();
+
+    const blood =
+      info.bloodType === "other"
+        ? info.bloodTypeOther?.trim()
+        : info.bloodType === "unknown"
+          ? ""
+          : info.bloodType;
+
+    const allergyLabels = joinLabels(info.allergies, allergyOptions);
+    const allergyOther = info.allergies?.includes("other")
+      ? info.allergiesOther?.trim()
+      : "";
+    const allergiesText = [allergyLabels, allergyOther]
+      .filter(Boolean)
+      .join(allergyLabels && allergyOther ? ", " : "");
+
+    const conditionLabels = joinLabels(info.conditions, conditionOptions);
+    const conditionOther = info.conditions?.includes("other")
+      ? info.conditionsOther?.trim()
+      : "";
+    const conditionsText = [conditionLabels, conditionOther]
+      .filter(Boolean)
+      .join(conditionLabels && conditionOther ? ", " : "");
+
+    const hasMedical =
+      !!lang ||
+      !!blood ||
+      !!allergiesText ||
+      !!conditionsText ||
+      !!info.medications?.trim() ||
+      !!info.medicalNotes?.trim();
 
     return (
       <div className="space-y-4">
@@ -1161,6 +1429,56 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
           </div>
         )}
 
+        {hasMedical && (
+          <div className="space-y-2">
+            <div className={`${sectionTitle} font-semibold text-slate-700`}>
+              Medical
+            </div>
+
+            {lang && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Language:</span> {lang}
+              </div>
+            )}
+
+            {blood && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Blood type:</span> {blood}
+              </div>
+            )}
+
+            {allergiesText && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Allergies:</span>{" "}
+                {allergiesText}
+              </div>
+            )}
+
+            {conditionsText && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Conditions:</span>{" "}
+                {conditionsText}
+              </div>
+            )}
+
+            {info.medications?.trim() && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Medications:</span>{" "}
+                {info.medications.trim()}
+              </div>
+            )}
+
+            {info.medicalNotes?.trim() && (
+              <div
+                className={`${valueSize} text-slate-900 whitespace-pre-wrap`}
+              >
+                <span className="font-semibold">Notes:</span>{" "}
+                {info.medicalNotes.trim()}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2">
           <div className={`${sectionTitle} font-semibold text-slate-700`}>
             Emergency Contacts
@@ -1172,12 +1490,41 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
             <div className="space-y-2">
               {emergencyContacts.map((c) => {
                 const rel = c.relationship ? ` • ${c.relationship}` : "";
+                const tel = safeTelHref(c.phone);
+                const disabled = !tel;
+
                 return (
-                  <div key={c.id} className={`${valueSize} text-slate-900`}>
-                    <div className="font-semibold">{c.name}</div>
-                    <div className={`${subtle} text-slate-600`}>
-                      {c.phone}
-                      {rel}
+                  <div
+                    key={c.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div
+                          className={`${valueSize} font-semibold text-slate-900 truncate`}
+                        >
+                          {c.name}
+                        </div>
+                        <div className={`mt-0.5 ${subtle} text-slate-600`}>
+                          {c.phone}
+                          {rel}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => callEmergencyContact(c)}
+                        disabled={disabled}
+                        className={[
+                          "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold",
+                          disabled
+                            ? "border border-slate-200 bg-slate-50 text-slate-400"
+                            : "bg-slate-900 text-white hover:opacity-90",
+                          "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20",
+                        ].join(" ")}
+                      >
+                        Call
+                      </button>
                     </div>
                   </div>
                 );
@@ -1186,7 +1533,7 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
           )}
         </div>
 
-        {info.medicalNotes.trim() && (
+        {/* {info.medicalNotes.trim() && (
           <div className="space-y-2">
             <div className={`${sectionTitle} font-semibold text-slate-700`}>
               Medical notes
@@ -1201,7 +1548,7 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
               {info.medicalNotes.trim()}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     );
   }
@@ -1244,82 +1591,308 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
           </div>
         </summary>
 
-        {/* Editor */}
-        <div className="mt-4 space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700">
-                Full name (optional)
-              </label>
-              <input
-                value={info.fullName}
-                onChange={(e) =>
-                  setInfo((x) => ({ ...x, fullName: e.target.value }))
-                }
-                placeholder="e.g. Alex Smith"
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-              />
+        {mode === "normal" && (
+          <>
+            {/* Editor */}
+            <div className="mt-4 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {/* 1) Full name */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Full name (optional)
+                  </label>
+                  <input
+                    value={info.fullName}
+                    onChange={(e) =>
+                      setInfo((x) => ({ ...x, fullName: e.target.value }))
+                    }
+                    placeholder="e.g. Alex Smith"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                </div>
+
+                {/* 2) Home country */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Home country (optional)
+                  </label>
+
+                  {Array.isArray(countries) && countries.length ? (
+                    <select
+                      value={info.homeCountryIso2}
+                      onChange={(e) =>
+                        setInfo((x) => ({
+                          ...x,
+                          homeCountryIso2: e.target.value,
+                        }))
+                      }
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    >
+                      <option value="">—</option>
+                      {countries.map((c) => (
+                        <option key={c.iso2} value={c.iso2}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={info.homeCountryIso2}
+                      onChange={(e) =>
+                        setInfo((x) => ({
+                          ...x,
+                          homeCountryIso2: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g. GB"
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    />
+                  )}
+                </div>
+
+                {/* 3) Primary language */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Primary language (optional)
+                  </label>
+
+                  <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                    <select
+                      value={info.primaryLanguage}
+                      onChange={(e) =>
+                        setInfo((x) => ({
+                          ...x,
+                          primaryLanguage: e.target.value,
+                          primaryLanguageOther:
+                            e.target.value === "Other"
+                              ? x.primaryLanguageOther
+                              : "",
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    >
+                      <option value="">—</option>
+                      {languageOptions.map((l) => (
+                        <option key={l} value={l}>
+                          {l}
+                        </option>
+                      ))}
+                    </select>
+
+                    {info.primaryLanguage === "Other" && (
+                      <input
+                        value={info.primaryLanguageOther}
+                        onChange={(e) =>
+                          setInfo((x) => ({
+                            ...x,
+                            primaryLanguageOther: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter language"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Blood type */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Blood type (optional)
+                  </label>
+
+                  <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                    <select
+                      value={info.bloodType}
+                      onChange={(e) =>
+                        setInfo((x) => ({
+                          ...x,
+                          bloodType: e.target.value,
+                          bloodTypeOther:
+                            e.target.value === "other" ? x.bloodTypeOther : "",
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                    >
+                      {bloodTypeOptions.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {info.bloodType === "other" && (
+                      <input
+                        value={info.bloodTypeOther}
+                        onChange={(e) =>
+                          setInfo((x) => ({
+                            ...x,
+                            bloodTypeOther: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter blood type"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                      />
+                    )}
+                  </div>
+
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Only add this if you’re sure. Hospitals will still verify.
+                  </p>
+                </div>
+
+                {/* 5) Allergies + Conditions */}
+                <div className="sm:col-span-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {/* Allergies */}
+                    <div>
+                      <div className="text-[11px] font-semibold text-slate-700">
+                        Allergies (optional)
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {allergyOptions.map((o) => {
+                          const active = info.allergies?.includes(o.key);
+                          return (
+                            <button
+                              key={o.key}
+                              type="button"
+                              onClick={() =>
+                                setInfo((x) => ({
+                                  ...x,
+                                  allergies: toggleInArray(x.allergies, o.key),
+                                  allergiesOther:
+                                    o.key === "other" &&
+                                    !x.allergies?.includes("other")
+                                      ? x.allergiesOther
+                                      : x.allergiesOther,
+                                }))
+                              }
+                              className={[
+                                "rounded-full px-3 py-1 text-xs font-semibold border transition",
+                                active
+                                  ? "border-slate-900 bg-slate-900 text-white"
+                                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                              ].join(" ")}
+                            >
+                              {o.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {info.allergies?.includes("other") && (
+                        <input
+                          value={info.allergiesOther}
+                          onChange={(e) =>
+                            setInfo((x) => ({
+                              ...x,
+                              allergiesOther: e.target.value,
+                            }))
+                          }
+                          placeholder="Other allergy (e.g. kiwi)"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                        />
+                      )}
+                    </div>
+
+                    {/* Conditions */}
+                    <div>
+                      <div className="text-[11px] font-semibold text-slate-700">
+                        Medical conditions (optional)
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {conditionOptions.map((o) => {
+                          const active = info.conditions?.includes(o.key);
+                          return (
+                            <button
+                              key={o.key}
+                              type="button"
+                              onClick={() =>
+                                setInfo((x) => ({
+                                  ...x,
+                                  conditions: toggleInArray(
+                                    x.conditions,
+                                    o.key,
+                                  ),
+                                }))
+                              }
+                              className={[
+                                "rounded-full px-3 py-1 text-xs font-semibold border transition",
+                                active
+                                  ? "border-slate-900 bg-slate-900 text-white"
+                                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                              ].join(" ")}
+                            >
+                              {o.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {info.conditions?.includes("other") && (
+                        <input
+                          value={info.conditionsOther}
+                          onChange={(e) =>
+                            setInfo((x) => ({
+                              ...x,
+                              conditionsOther: e.target.value,
+                            }))
+                          }
+                          placeholder="Other condition (e.g. kidney disease)"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6) Medications */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Current medications (optional)
+                  </label>
+                  <input
+                    value={info.medications}
+                    onChange={(e) =>
+                      setInfo((x) => ({ ...x, medications: e.target.value }))
+                    }
+                    placeholder="e.g. insulin, warfarin"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Short list is best. Separate with commas.
+                  </p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Medical notes (optional)
+                  </label>
+                  <textarea
+                    value={info.medicalNotes}
+                    onChange={(e) =>
+                      setInfo((x) => ({ ...x, medicalNotes: e.target.value }))
+                    }
+                    placeholder="Allergies, conditions, medications…"
+                    rows={4}
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Keep it short. This is shown to others in emergencies.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={clearAll}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Clear card details
+              </button>
             </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700">
-                Home country (optional)
-              </label>
-
-              {Array.isArray(countries) && countries.length ? (
-                <select
-                  value={info.homeCountryIso2}
-                  onChange={(e) =>
-                    setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
-                  }
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                >
-                  <option value="">—</option>
-                  {countries.map((c) => (
-                    <option key={c.iso2} value={c.iso2}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  value={info.homeCountryIso2}
-                  onChange={(e) =>
-                    setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
-                  }
-                  placeholder="e.g. GB"
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                />
-              )}
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-[11px] font-semibold text-slate-700">
-                Medical notes (optional)
-              </label>
-              <textarea
-                value={info.medicalNotes}
-                onChange={(e) =>
-                  setInfo((x) => ({ ...x, medicalNotes: e.target.value }))
-                }
-                placeholder="Allergies, conditions, medications…"
-                rows={4}
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-              />
-              <p className="mt-1 text-[11px] text-slate-500">
-                Keep it short. This is shown to others in emergencies.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={clearAll}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Clear card details
-          </button>
-        </div>
+          </>
+        )}
 
         {/* Preview */}
         <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
@@ -1361,6 +1934,17 @@ function EmergencyInfoCard({ countries, emergencyContacts }) {
       </details>
     </section>
   );
+}
+
+function callEmergencyContact(c) {
+  const href = safeTelHref(c?.phone);
+  if (!href) return;
+
+  const label = `${c.name}${c.relationship ? ` (${c.relationship})` : ""}`;
+  const ok = window.confirm(`Call ${label}: ${c.phone}?`);
+  if (!ok) return;
+
+  window.location.assign(href);
 }
 
 export default function App() {
@@ -1795,11 +2379,12 @@ export default function App() {
 
           {/* Emergency Contacts + Info card */}
           <div className="mt-4 space-y-4">
-            <ICEContacts
+            <EmergencyContacts
               contacts={emergencyContacts}
               setContacts={setEmergencyContacts}
             />
             <EmergencyInfoCard
+              mode="emergency"
               countries={countries}
               emergencyContacts={emergencyContacts}
             />
@@ -2086,12 +2671,13 @@ export default function App() {
               <WhatToSayAll defaultService="general" />
             </section>
 
-            <ICEContacts
+            <EmergencyContacts
               contacts={emergencyContacts}
               setContacts={setEmergencyContacts}
             />
 
             <EmergencyInfoCard
+              mode="normal"
               countries={countries}
               emergencyContacts={emergencyContacts}
             />
