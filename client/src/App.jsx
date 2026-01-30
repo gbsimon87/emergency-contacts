@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGeolocation } from "./hooks/useGeolocation";
 import "./App.css";
 
@@ -235,13 +235,13 @@ function FirstAidGuidance() {
   const [activeKey, setActiveKey] = useState(sorted[0]?.key || "");
 
   // keep activeKey valid if the list changes (defensive, but nice)
-  useEffect(() => {
-    if (!sorted.length) return;
-    if (!activeKey || !sorted.some((c) => c.key === activeKey)) {
-      setActiveKey(sorted[0].key);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorted.length]);
+  // useEffect(() => {
+  //   if (!sorted.length) return;
+  //   if (!activeKey || !sorted.some((c) => c.key === activeKey)) {
+  //     setActiveKey(sorted[0].key);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [sorted.length]);
 
   const active = sorted.find((c) => c.key === activeKey) || sorted[0];
 
@@ -337,6 +337,219 @@ function FirstAidGuidance() {
         </div>
       </details>
     </section>
+  );
+}
+
+function CountryCombobox({
+  countries,
+  valueIso2,
+  onChangeIso2,
+  loadingCountry,
+  onUseMyLocation,
+  detectingCountry,
+}) {
+  const selected = useMemo(
+    () => countries.find((c) => c.iso2 === valueIso2) || null,
+    [countries, valueIso2],
+  );
+
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(""); // used for filtering
+  const [draft, setDraft] = useState(""); // what user is typing while open
+  const [highlightIndex, setHighlightIndex] = useState(0);
+
+  const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Close on outside click (setState happens in an event callback -> OK)
+  useEffect(() => {
+    function onDocMouseDown(e) {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery("");
+        setDraft("");
+        setHighlightIndex(0);
+      }
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return countries;
+    return countries.filter((c) => c.name.toLowerCase().includes(q));
+  }, [countries, query]);
+
+  // Clamp highlight index without an effect
+  const safeHighlightIndex = Math.min(
+    highlightIndex,
+    Math.max(0, filtered.length - 1),
+  );
+
+  const inputValue = open ? draft : selected?.name || "";
+
+  function pick(iso2) {
+    onChangeIso2(iso2);
+    setOpen(false);
+    setQuery("");
+    setDraft("");
+    setHighlightIndex(0);
+  }
+
+  function onFocus() {
+    setOpen(true);
+    setQuery("");
+    setDraft(selected?.name || "");
+    setHighlightIndex(0);
+  }
+
+  function onInputChange(e) {
+    const next = e.target.value;
+    setDraft(next);
+    setQuery(next);
+    setOpen(true);
+    setHighlightIndex(0);
+  }
+
+  function onKeyDown(e) {
+    if (!open && (e.key === "ArrowDown" || e.key === "Enter")) {
+      setOpen(true);
+      setQuery("");
+      setDraft(selected?.name || "");
+      setHighlightIndex(0);
+      return;
+    }
+
+    if (!open) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const item = filtered[safeHighlightIndex];
+      if (item) pick(item.iso2);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+      setQuery("");
+      setDraft("");
+      setHighlightIndex(0);
+      inputRef.current?.blur();
+    }
+  }
+
+  const showEmpty = open && filtered.length === 0;
+
+  return (
+    <div className="space-y-1.5" ref={wrapperRef}>
+      <label className="block text-xs font-medium text-slate-600">
+        Country
+      </label>
+
+      <div className="flex items-stretch gap-2">
+        <div className="relative flex-1 min-w-0">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={onInputChange}
+            onFocus={onFocus}
+            onKeyDown={onKeyDown}
+            placeholder="Search country…"
+            aria-label="Country"
+            className={[
+              "w-full rounded-2xl border border-slate-200 bg-white",
+              "px-3 py-2.5 text-sm",
+              "placeholder:text-slate-400",
+              "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
+            ].join(" ")}
+          />
+
+          {open && (
+            <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+              <div className="max-h-72 overflow-auto py-1">
+                {showEmpty ? (
+                  <div className="px-3 py-2 text-sm text-slate-600">
+                    No countries match your search.
+                  </div>
+                ) : (
+                  filtered.map((c, idx) => {
+                    const active = idx === safeHighlightIndex;
+                    const isSelected = c.iso2 === valueIso2;
+
+                    return (
+                      <button
+                        key={c.iso2}
+                        type="button"
+                        onMouseEnter={() => setHighlightIndex(idx)}
+                        onMouseDown={(e) => e.preventDefault()} // prevent blur
+                        onClick={() => pick(c.iso2)}
+                        className={[
+                          "w-full text-left px-3 py-2 text-sm",
+                          active ? "bg-slate-100" : "bg-white",
+                          isSelected
+                            ? "font-semibold text-slate-900"
+                            : "text-slate-700",
+                        ].join(" ")}
+                      >
+                        {c.name}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="border-t border-slate-200 px-3 py-2 text-[11px] text-slate-500">
+                {loadingCountry
+                  ? "Fetching local emergency numbers…"
+                  : "Type to filter, Enter to select"}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onUseMyLocation}
+          disabled={detectingCountry}
+          title="Use my location"
+          aria-label="Use my location"
+          className={[
+            "shrink-0 rounded-2xl px-3",
+            "border border-slate-200 bg-white",
+            "hover:bg-slate-50 active:scale-[0.99] transition",
+            "disabled:opacity-60 disabled:pointer-events-none",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+            "inline-flex items-center justify-center",
+          ].join(" ")}
+        >
+          {detectingCountry ? (
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900"
+              aria-hidden="true"
+            />
+          ) : (
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5 text-slate-700"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" />
+              <path d="M12 11a2 2 0 100-4 2 2 0 000 4z" />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -506,7 +719,6 @@ export default function App() {
   );
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [loadingCountry, setLoadingCountry] = useState(false);
-  const [search, setSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
@@ -589,20 +801,6 @@ export default function App() {
   useEffect(() => {
     fetchCountryDetails(selectedIso2);
   }, [selectedIso2]);
-
-  const filteredCountries = useMemo(() => {
-    if (!search.trim()) return countries;
-    const q = search.toLowerCase();
-    return countries.filter((c) => c.name.toLowerCase().includes(q));
-  }, [countries, search]);
-
-  useEffect(() => {
-    if (!filteredCountries.length) return;
-    const stillVisible = filteredCountries.some((c) => c.iso2 === selectedIso2);
-    if (!stillVisible && search.trim()) {
-      setSelectedIso2(filteredCountries[0].iso2);
-    }
-  }, [filteredCountries, selectedIso2, search]);
 
   useEffect(() => {
     function handleOnline() {
@@ -842,197 +1040,56 @@ export default function App() {
             </div>
 
             <div className="mt-4 space-y-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-slate-600">
-                  Search
-                </label>
-                <input
-                  type="text"
-                  placeholder="Search country…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className={[
-                    "w-full rounded-2xl border border-slate-200 bg-slate-50",
-                    "px-3 py-2.5 text-sm",
-                    "placeholder:text-slate-400",
-                    "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
-                  ].join(" ")}
-                />
-              </div>
+              <CountryCombobox
+                countries={countries}
+                valueIso2={selectedIso2}
+                loadingCountry={loadingCountry}
+                detectingCountry={detectingCountry}
+                onUseMyLocation={useMyLocation}
+                onChangeIso2={(iso2) => {
+                  setSelectedIso2(iso2);
+                  localStorage.setItem(STORAGE_MANUAL_KEY, "1");
+                }}
+              />
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-slate-600">
-                  Country list
-                </label>
-
-                <div className="flex items-stretch gap-2">
-                  <select
-                    value={selectedIso2}
-                    onChange={(e) => {
-                      const iso2 = e.target.value;
-                      setSelectedIso2(iso2);
-                      localStorage.setItem(STORAGE_MANUAL_KEY, "1");
-                    }}
-                    className={[
-                      "flex-1 min-w-0 rounded-2xl border border-slate-200 bg-white",
-                      "px-3 py-2.5 text-sm",
-                      "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
-                    ].join(" ")}
-                  >
-                    {filteredCountries.map((c) => (
-                      <option key={c.iso2} value={c.iso2}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <button
-                    type="button"
-                    onClick={useMyLocation}
-                    disabled={detectingCountry}
-                    title="Use my location"
-                    aria-label="Use my location"
-                    className={[
-                      "shrink-0 rounded-2xl px-3",
-                      "border border-slate-200 bg-white",
-                      "hover:bg-slate-50 active:scale-[0.99] transition",
-                      "disabled:opacity-60 disabled:pointer-events-none",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                      "inline-flex items-center justify-center",
-                    ].join(" ")}
-                  >
-                    {detectingCountry ? (
-                      // tiny spinner
-                      <span
-                        className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      // location icon (no dependency)
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        className="h-5 w-5 text-slate-700"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" />
-                        <path d="M12 11a2 2 0 100-4 2 2 0 000 4z" />
-                      </svg>
-                    )}
-                  </button>
+              {autoSuggested && (
+                <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+                  We selected a country automatically — please confirm it's
+                  correct.
                 </div>
+              )}
 
-                {autoSuggested && (
-                  <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
-                    We selected a country automatically — please confirm it's
-                    correct.
+              {detectedIso2 && detectedIso2 !== selectedIso2 && (
+                <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 space-y-2">
+                  <div className="font-semibold">
+                    Detected country: {detectedIso2}. Switch to it?
                   </div>
-                )}
-
-                {/* Location status (lighter UI) */}
-                {location.status !== "not_requested" && (
-                  <>
-                    {/* If granted AND no error, show a tiny success line */}
-                    {location.status === "granted" && !location.errorMessage ? (
-                      <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-600">
-                        <span
-                          className="inline-block h-2 w-2 rounded-full bg-emerald-500"
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <span className="font-semibold text-slate-700">
-                            Location enabled
-                          </span>{" "}
-                          — you can use Nearby help.
-                        </span>
-                      </div>
-                    ) : (
-                      /* Otherwise show the full status box (not granted OR has an error) */
-                      <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 space-y-1">
-                        <div>
-                          <span className="font-semibold">
-                            Location status:
-                          </span>{" "}
-                          {location.status === "requesting"
-                            ? "Requesting…"
-                            : location.status === "granted"
-                              ? "Granted"
-                              : location.status === "denied"
-                                ? "Denied"
-                                : location.status === "timed_out"
-                                  ? "Timed out"
-                                  : location.status === "unavailable"
-                                    ? "Unavailable"
-                                    : "Error"}
-                        </div>
-
-                        {location.errorMessage && (
-                          <div className="text-[11px] text-slate-600">
-                            {location.errorMessage}
-                          </div>
-                        )}
-
-                        {(location.status === "denied" ||
-                          location.status === "timed_out" ||
-                          location.status === "unavailable" ||
-                          location.status === "error") && (
-                          <button
-                            type="button"
-                            onClick={useMyLocation}
-                            className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-100"
-                          >
-                            Try again
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Detected country confirmation prompt (no auto-switch) */}
-                {detectedIso2 && detectedIso2 !== selectedIso2 && (
-                  <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 space-y-2">
-                    <div className="font-semibold">
-                      Detected country: {detectedIso2}. Switch to it?
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedIso2(detectedIso2);
-                          localStorage.setItem(STORAGE_MANUAL_KEY, "1"); // user-confirmed choice
-                          setDetectedIso2(null);
-                          setAutoSuggested(true);
-                          window.setTimeout(
-                            () => setAutoSuggested(false),
-                            2500,
-                          );
-                        }}
-                        className="flex-1 rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
-                      >
-                        Yes, switch
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDetectedIso2(null)}
-                        className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
-                      >
-                        No
-                      </button>
-                    </div>
-                    <div className="text-[11px] text-slate-500">
-                      We’ll never change your country without asking.
-                    </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedIso2(detectedIso2);
+                        localStorage.setItem(STORAGE_MANUAL_KEY, "1");
+                        setDetectedIso2(null);
+                        setAutoSuggested(true);
+                        window.setTimeout(() => setAutoSuggested(false), 2500);
+                      }}
+                      className="flex-1 rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
+                    >
+                      Yes, switch
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDetectedIso2(null)}
+                      className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
+                    >
+                      No
+                    </button>
                   </div>
-                )}
-              </div>
-
-              {filteredCountries.length === 0 && (
-                <p className="text-sm text-slate-600">
-                  No countries match your search.
-                </p>
+                  <div className="text-[11px] text-slate-500">
+                    We'll never change your country without asking.
+                  </div>
+                </div>
               )}
 
               {appError && (
