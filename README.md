@@ -290,14 +290,14 @@ These features prioritize **offline access, clarity, and trust**, not automation
 
 **Goal:** Allow responders or bystanders to contact someone the user trusts.
 
-- [ ] Add personal emergency contacts (“ICE”):
-  - [ ] Name
-  - [ ] Phone number
-  - [ ] Relationship (optional)
-- [ ] One-tap call buttons
-- [ ] Clear separation from emergency services
-- [ ] Fully available offline
-- [ ] Stored locally by default (account sync optional later)
+- [x] Add personal emergency contacts (“ICE”):
+  - [x] Name
+  - [x] Phone number
+  - [x] Relationship (optional)
+- [x] One-tap call buttons
+- [x] Clear separation from emergency services
+- [x] Fully available offline
+- [x] Stored locally by default (account sync optional later)
 
 **Why this matters:**  
 Emergency services aren’t always enough. Reaching a trusted person can be critical.
@@ -308,15 +308,15 @@ Emergency services aren’t always enough. Reaching a trusted person can be crit
 
 **Goal:** Provide critical personal information when the user cannot speak.
 
-- [ ] Single emergency info card:
-  - [ ] Name (optional)
-  - [ ] Home country (optional)
-  - [ ] ICE contacts
-  - [ ] Medical notes (allergies, conditions, medications)
-- [ ] One-tap “Show full screen”
-- [ ] One-tap “Share”
-- [ ] Works completely offline
-- [ ] Clear disclaimer: user-provided information only
+- [x] Single emergency info card:
+  - [x] Name (optional)
+  - [x] Home country (optional)
+  - [x] ICE contacts
+  - [x] Medical notes (allergies, conditions, medications)
+- [x] One-tap “Show full screen”
+- [x] One-tap “Share”
+- [x] Works completely offline
+- [x] Clear disclaimer: user-provided information only
 
 **Why this matters:**  
 This information is often needed when the user is least able to provide it.
@@ -327,14 +327,14 @@ This information is often needed when the user is least able to provide it.
 
 **Goal:** Make offline usage explicit, calm, and reliable.
 
-- [ ] Dedicated emergency-focused view
-- [ ] Clearly indicates offline state without alarm
-- [ ] Prioritizes offline-safe features:
-  - [ ] Emergency numbers
-  - [ ] ICE contacts
-  - [ ] Emergency info card
-- [ ] No background sync or retry loops
-- [ ] No blocking states caused by connectivity loss
+- [x] Dedicated emergency-focused view
+- [x] Clearly indicates offline state without alarm
+- [x] Prioritizes offline-safe features:
+  - [x] Emergency numbers
+  - [x] ICE contacts
+  - [x] Emergency info card
+- [x] No background sync or retry loops
+- [x] No blocking states caused by connectivity loss
 
 **Why this matters:**  
 Emergencies are chaotic. The app must feel stable even when the network is not.

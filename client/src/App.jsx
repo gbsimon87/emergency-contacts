@@ -1367,6 +1367,7 @@ export default function App() {
   const [detectedIso2, setDetectedIso2] = useState(null);
   const [detectingCountry, setDetectingCountry] = useState(false);
   const [iceContacts, setIceContacts] = useState(() => loadIceContacts());
+  const [emergencyMode, setEmergencyMode] = useState(false);
 
   const [appError, setAppError] = useState("");
 
@@ -1395,6 +1396,14 @@ export default function App() {
       setAppError("Can't reach the server right now. Please try again.");
     }
   }
+
+  const emergencyCountry = useMemo(() => {
+    // Prefer current in-memory selectedCountry if it matches the selectedIso2.
+    if (selectedCountry?.iso2 === selectedIso2) return selectedCountry;
+
+    // Otherwise pull directly from cache (instant, offline-safe)
+    return loadCachedCountryDetails(selectedIso2);
+  }, [selectedCountry, selectedIso2]);
 
   async function fetchCountryDetails(iso2) {
     const cacheKey = `${CACHE_COUNTRY_DETAILS_PREFIX}${iso2}`;
@@ -1433,12 +1442,18 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (emergencyMode) return;
     fetchCountries();
-  }, []);
+  }, [emergencyMode]);
 
   useEffect(() => {
+    if (emergencyMode) return;
+
+    // Optional: if you want *zero* spinners/retries while offline even in normal mode:
+    // if (isOffline) return;
+
     fetchCountryDetails(selectedIso2);
-  }, [selectedIso2]);
+  }, [selectedIso2, emergencyMode /*, isOffline */]);
 
   useEffect(() => {
     function handleOnline() {
@@ -1482,8 +1497,8 @@ export default function App() {
   }, [iceContacts]);
 
   const services = useMemo(
-    () => selectedCountry?.services || {},
-    [selectedCountry],
+    () => emergencyCountry?.services || {},
+    [emergencyCountry],
   );
 
   function formatServiceValue(value) {
@@ -1554,7 +1569,7 @@ export default function App() {
     }
   }
 
-  async function useMyLocation() {
+  async function detectMyCountry() {
     setAppError("");
 
     let coords = null;
@@ -1647,6 +1662,158 @@ export default function App() {
       );
   }
 
+  function loadCachedCountryDetails(iso2) {
+    const key = `${CACHE_COUNTRY_DETAILS_PREFIX}${iso2}`;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  function EmergencyModeView({
+    isOffline,
+    selectedIso2,
+    selectedCountry,
+    services,
+    iso2ToFlag,
+    iceContacts,
+    setIceContacts,
+    countries,
+    onExit,
+  }) {
+    const countryLabel = selectedCountry?.name || selectedIso2 || "—";
+
+    return (
+      <main className="min-h-screen bg-slate-50 text-slate-900">
+        <div className="mx-auto max-w-5xl px-4 py-8 pb-10">
+          {/* Header */}
+          <header className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Emergency Mode
+              </h1>
+              <p className="mt-1 text-sm text-slate-600">
+                Using saved info on this device.
+              </p>
+
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                {isOffline ? "Offline" : "Emergency-focused view"}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onExit}
+              className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+            >
+              Back
+            </button>
+          </header>
+
+          {/* If we have no cached country details */}
+          {!selectedCountry && (
+            <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+              <div className="text-sm font-semibold text-slate-900">
+                Emergency numbers
+              </div>
+              <p className="mt-2 text-sm text-slate-600">
+                No saved emergency numbers for{" "}
+                <span className="font-semibold">{countryLabel}</span> yet.
+              </p>
+              <p className="mt-1 text-[11px] text-slate-500">
+                When you’re online, open a country once to save it for offline
+                use.
+              </p>
+            </section>
+          )}
+
+          {/* Emergency numbers */}
+          {selectedCountry && (
+            <section className="mt-6 rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-900">
+                    Emergency numbers
+                  </div>
+
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-lg leading-none">
+                      {iso2ToFlag(selectedCountry.iso2 || selectedIso2)}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800 truncate">
+                      {selectedCountry.name || countryLabel}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      • Saved on this device
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <CallButton
+                    label="General Emergency"
+                    number={services.general}
+                  />
+                </div>
+                <div>
+                  <CallButton label="Police" number={services.police} />
+                </div>
+                <div>
+                  <CallButton label="Ambulance" number={services.ambulance} />
+                </div>
+                <div>
+                  <CallButton label="Fire" number={services.fire} />
+                </div>
+              </div>
+
+              <WhatToSayAll defaultService="general" />
+            </section>
+          )}
+
+          {/* ICE + Info card */}
+          <div className="mt-4 space-y-4">
+            <ICEContacts contacts={iceContacts} setContacts={setIceContacts} />
+            <EmergencyInfoCard
+              countries={countries}
+              iceContacts={iceContacts}
+            />
+          </div>
+
+          {/* Calm disclaimer */}
+          <footer className="mt-6 rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+            <p className="text-sm font-semibold">Note</p>
+            <p className="mt-1 text-sm text-slate-600">
+              This view avoids network requests to stay stable during poor
+              connectivity.
+            </p>
+          </footer>
+        </div>
+      </main>
+    );
+  }
+
+  if (emergencyMode) {
+    return (
+      <EmergencyModeView
+        isOffline={isOffline}
+        selectedIso2={selectedIso2}
+        selectedCountry={emergencyCountry}
+        services={services}
+        iso2ToFlag={iso2ToFlag}
+        iceContacts={iceContacts}
+        setIceContacts={setIceContacts}
+        countries={countries}
+        onExit={() => setEmergencyMode(false)}
+      />
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-5xl px-4 py-8 pb-28 sm:py-10 md:pb-10">
@@ -1660,7 +1827,37 @@ export default function App() {
               Select a country to see emergency numbers. Tap to call.
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setEmergencyMode(true)}
+              className={[
+                "rounded-full px-4 py-2 text-sm font-semibold",
+                "border border-slate-200 bg-white",
+                "hover:bg-slate-50",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20",
+              ].join(" ")}
+            >
+              Emergency Mode
+            </button>
+          </div>
         </header>
+
+        {isOffline && !emergencyMode && (
+          <div className="mt-4 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-center justify-between gap-3">
+            <div className="text-sm text-amber-900">
+              <span className="font-semibold">Offline.</span> Using saved info
+              on this device.
+            </div>
+            <button
+              type="button"
+              onClick={() => setEmergencyMode(true)}
+              className="shrink-0 rounded-full bg-slate-900 text-white px-3 py-1.5 text-xs font-semibold hover:opacity-90"
+            >
+              Open Emergency Mode
+            </button>
+          </div>
+        )}
 
         {/* Main content layout */}
         <div className="mt-6 grid gap-4 md:grid-cols-[360px,1fr] md:items-start">
@@ -1686,8 +1883,16 @@ export default function App() {
                 countries={countries}
                 valueIso2={selectedIso2}
                 loadingCountry={loadingCountry}
-                detectingCountry={detectingCountry}
-                onUseMyLocation={useMyLocation}
+                detectingCountry={detectingCountry || isOffline}
+                onUseMyLocation={() => {
+                  if (isOffline) {
+                    setAppError(
+                      "Offline — location-based country detection needs internet.",
+                    );
+                    return;
+                  }
+                  detectMyCountry();
+                }}
                 onChangeIso2={(iso2) => {
                   setSelectedIso2(iso2);
                   localStorage.setItem(STORAGE_MANUAL_KEY, "1");
