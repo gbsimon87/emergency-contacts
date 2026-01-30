@@ -6,7 +6,7 @@ const STORAGE_KEY = "ec_selected_country_iso2";
 const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
 const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
 const STORAGE_MANUAL_KEY = "ec_country_manually_set";
-const ICE_STORAGE_KEY = "ec_ice_contacts_v1";
+const EMERGENCY_CONTACTS_STORAGE_KEY = "ec_contacts_v1";
 const INFO_CARD_STORAGE_KEY = "ec_info_card_v1";
 
 function WhatToSayAll({ defaultService = "general" }) {
@@ -560,9 +560,9 @@ function makeId() {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function loadIceContacts() {
+function loadEmergencyContacts() {
   try {
-    const raw = localStorage.getItem(ICE_STORAGE_KEY);
+    const raw = localStorage.getItem(EMERGENCY_CONTACTS_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
 
@@ -620,14 +620,14 @@ function saveInfoCard(info) {
   localStorage.setItem(INFO_CARD_STORAGE_KEY, JSON.stringify(payload));
 }
 
-function saveIceContacts(contacts) {
+function saveEmergencyContacts(contacts) {
   // Future auth: keep versioned object so you can migrate and sync later.
   const payload = {
     version: 1,
     contacts,
     // Future: you can add `syncedAt`, `source`, etc. without breaking shape
   };
-  localStorage.setItem(ICE_STORAGE_KEY, JSON.stringify(payload));
+  localStorage.setItem(EMERGENCY_CONTACTS_STORAGE_KEY, JSON.stringify(payload));
 }
 
 function safeTelHref(value) {
@@ -718,7 +718,7 @@ function ICEContacts({ contacts, setContacts }) {
     const label = c
       ? `${c.name}${c.relationship ? ` (${c.relationship})` : ""}`
       : "this contact";
-    const ok = window.confirm(`Remove ICE contact: ${label}?`);
+    const ok = window.confirm(`Remove Emergency Contacts contact: ${label}?`);
     if (!ok) return;
 
     setContacts((prev) => prev.filter((x) => x.id !== id));
@@ -728,7 +728,7 @@ function ICEContacts({ contacts, setContacts }) {
     const href = safeTelHref(c.phone);
     if (!href) return;
 
-    const label = `ICE — ${c.name}${c.relationship ? ` (${c.relationship})` : ""}`;
+    const label = `Emergency Contacts — ${c.name}${c.relationship ? ` (${c.relationship})` : ""}`;
     const ok = window.confirm(`Call ${label}: ${c.phone}?`);
     if (!ok) return;
 
@@ -737,187 +737,193 @@ function ICEContacts({ contacts, setContacts }) {
 
   return (
     <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold text-slate-900">
-            ICE contacts
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Personal emergency contacts (stored on this device).
-          </div>
-        </div>
-
-        <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-          ICE
-        </span>
-      </div>
-
-      {/* Empty state */}
-      {contacts.length === 0 && !adding && (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-sm text-slate-700">No ICE contacts yet.</p>
-          <p className="mt-1 text-[11px] text-slate-500">
-            Add someone you trust so responders can call them if needed.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="mt-3 w-full rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
-          >
-            Add ICE contact
-          </button>
-        </div>
-      )}
-
-      {/* List */}
-      {contacts.length > 0 && (
-        <ul className="mt-4 space-y-2">
-          {contacts.map((c) => {
-            const href = safeTelHref(c.phone);
-            const disabled = !href;
-
-            return (
-              <li
-                key={c.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-slate-900 truncate">
-                      {c.name}
-                    </div>
-
-                    <div className="mt-0.5 text-xs text-slate-600">
-                      {c.relationship ? `${c.relationship} • ` : ""}
-                      {c.phone}
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => callContact(c)}
-                      disabled={disabled}
-                      className={[
-                        "rounded-full px-3 py-1 text-xs font-semibold",
-                        disabled
-                          ? "border border-slate-200 bg-white text-slate-400"
-                          : "bg-slate-900 text-white hover:opacity-90",
-                      ].join(" ")}
-                    >
-                      Call
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => removeContact(c.id)}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* Add form */}
-      <div className="mt-4">
-        {!adding && contacts.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
-          >
-            Add another ICE contact
-          </button>
-        )}
-
-        {adding && (
-          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-1">
-                <label className="block text-[11px] font-semibold text-slate-700">
-                  Name *
-                </label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Sarah Jones"
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                />
+      <details className="group">
+        <summary className="cursor-pointer select-none focus:outline-none">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-slate-900">
+                Emergency Contacts
               </div>
-
-              <div className="sm:col-span-1">
-                <label className="block text-[11px] font-semibold text-slate-700">
-                  Relationship (optional)
-                </label>
-                <input
-                  value={relationship}
-                  onChange={(e) => setRelationship(e.target.value)}
-                  placeholder="e.g. Partner, Parent"
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-[11px] font-semibold text-slate-700">
-                  Phone number *
-                </label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. +44 7..."
-                  inputMode="tel"
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-                />
-                {!phone.trim() ? null : !phoneHref ? (
-                  <p className="mt-1 text-[11px] text-red-600">
-                    Please enter a valid phone number.
-                  </p>
-                ) : (
-                  <p className="mt-1 text-[11px] text-slate-500">Looks good.</p>
-                )}
+              <div className="mt-1 text-xs text-slate-500">
+                Personal emergency contacts (stored on this device).
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={addContact}
-                disabled={!name.trim() || !safeTelHref(phone)}
-                className={[
-                  "flex-1 rounded-2xl px-3 py-2 text-xs font-semibold",
-                  !name.trim() || !safeTelHref(phone)
-                    ? "border border-slate-200 bg-slate-50 text-slate-400"
-                    : "bg-slate-900 text-white hover:opacity-90",
-                ].join(" ")}
-              >
-                Save contact
-              </button>
+            <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              Emergency Contacts
+            </span>
+          </div>
+        </summary>
 
-              <button
-                type="button"
-                onClick={() => {
-                  resetForm();
-                  setAdding(false);
-                }}
-                className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <p className="text-[11px] text-slate-500">
-              Stored on this device. In a future update, you’ll be able to sync
-              contacts by signing in.
+        {/* Empty state */}
+        {contacts.length === 0 && !adding && (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-sm text-slate-700">No Emergency Contacts yet.</p>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Add someone you trust so responders can call them if needed.
             </p>
+
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="mt-3 w-full rounded-2xl bg-slate-900 text-white px-3 py-2 text-xs font-semibold hover:opacity-90"
+            >
+              Add Emergency Contacts contact
+            </button>
           </div>
         )}
-      </div>
+
+        {/* List */}
+        {contacts.length > 0 && (
+          <ul className="mt-4 space-y-2">
+            {contacts.map((c) => {
+              const href = safeTelHref(c.phone);
+              const disabled = !href;
+
+              return (
+                <li
+                  key={c.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 truncate">
+                        {c.name}
+                      </div>
+
+                      <div className="mt-0.5 text-xs text-slate-600">
+                        {c.relationship ? `${c.relationship} • ` : ""}
+                        {c.phone}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => callContact(c)}
+                        disabled={disabled}
+                        className={[
+                          "rounded-full px-3 py-1 text-xs font-semibold",
+                          disabled
+                            ? "border border-slate-200 bg-white text-slate-400"
+                            : "bg-slate-900 text-white hover:opacity-90",
+                        ].join(" ")}
+                      >
+                        Call
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => removeContact(c.id)}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {/* Add form */}
+        <div className="mt-4">
+          {!adding && contacts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
+            >
+              Add another Emergency Contacts contact
+            </button>
+          )}
+
+          {adding && (
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-1">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Name *
+                  </label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Sarah Jones"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                </div>
+
+                <div className="sm:col-span-1">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Relationship (optional)
+                  </label>
+                  <input
+                    value={relationship}
+                    onChange={(e) => setRelationship(e.target.value)}
+                    placeholder="e.g. Partner, Parent"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Phone number *
+                  </label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +44 7..."
+                    inputMode="tel"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                  />
+                  {!phone.trim() ? null : !phoneHref ? (
+                    <p className="mt-1 text-[11px] text-red-600">
+                      Please enter a valid phone number.
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Looks good.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={addContact}
+                  disabled={!name.trim() || !safeTelHref(phone)}
+                  className={[
+                    "flex-1 rounded-2xl px-3 py-2 text-xs font-semibold",
+                    !name.trim() || !safeTelHref(phone)
+                      ? "border border-slate-200 bg-slate-50 text-slate-400"
+                      : "bg-slate-900 text-white hover:opacity-90",
+                  ].join(" ")}
+                >
+                  Save contact
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    setAdding(false);
+                  }}
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-500">
+                Stored on this device. In a future update, you’ll be able to
+                sync contacts by signing in.
+              </p>
+            </div>
+          )}
+        </div>
+      </details>
     </section>
   );
 }
@@ -1037,7 +1043,7 @@ function mapsLink(lat, lon) {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 }
 
-function EmergencyInfoCard({ countries, iceContacts }) {
+function EmergencyInfoCard({ countries, emergencyContacts }) {
   const [info, setInfo] = useState(() => loadInfoCard());
   const [fullScreen, setFullScreen] = useState(false);
 
@@ -1063,10 +1069,10 @@ function EmergencyInfoCard({ countries, iceContacts }) {
       lines.push(`Home country: ${info.homeCountryIso2.trim()}`);
     }
 
-    if (iceContacts?.length) {
+    if (emergencyContacts?.length) {
       lines.push("");
-      lines.push("ICE contacts:");
-      for (const c of iceContacts) {
+      lines.push("Emergency Contacts:");
+      for (const c of emergencyContacts) {
         const rel = c.relationship ? ` (${c.relationship})` : "";
         lines.push(`- ${c.name}${rel}: ${c.phone}`);
       }
@@ -1157,14 +1163,14 @@ function EmergencyInfoCard({ countries, iceContacts }) {
 
         <div className="space-y-2">
           <div className={`${sectionTitle} font-semibold text-slate-700`}>
-            ICE contacts
+            Emergency Contacts
           </div>
 
-          {!iceContacts?.length ? (
+          {!emergencyContacts?.length ? (
             <div className={`${valueSize} text-slate-600`}>None added yet.</div>
           ) : (
             <div className="space-y-2">
-              {iceContacts.map((c) => {
+              {emergencyContacts.map((c) => {
                 const rel = c.relationship ? ` • ${c.relationship}` : "";
                 return (
                   <div key={c.id} className={`${valueSize} text-slate-900`}>
@@ -1202,148 +1208,157 @@ function EmergencyInfoCard({ countries, iceContacts }) {
 
   return (
     <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold text-slate-900">
-            Emergency info card
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Quick to show or share. Stored on this device.
-          </div>
-        </div>
+      <details className="group">
+        <summary className="cursor-pointer select-none focus:outline-none">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-slate-900">
+                Emergency info card
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                Quick to show or share. Stored on this device.
+              </div>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setFullScreen(true)}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-50"
-          >
-            Full screen
-          </button>
-          <button
-            type="button"
-            onClick={shareCard}
-            className="rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:opacity-90"
-          >
-            Share
-          </button>
-        </div>
-      </div>
-
-      {/* Editor */}
-      <div className="mt-4 space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700">
-              Full name (optional)
-            </label>
-            <input
-              value={info.fullName}
-              onChange={(e) =>
-                setInfo((x) => ({ ...x, fullName: e.target.value }))
-              }
-              placeholder="e.g. Alex Smith"
-              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700">
-              Home country (optional)
-            </label>
-
-            {Array.isArray(countries) && countries.length ? (
-              <select
-                value={info.homeCountryIso2}
-                onChange={(e) =>
-                  setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
-                }
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-              >
-                <option value="">—</option>
-                {countries.map((c) => (
-                  <option key={c.iso2} value={c.iso2}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                value={info.homeCountryIso2}
-                onChange={(e) =>
-                  setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
-                }
-                placeholder="e.g. GB"
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-              />
-            )}
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="block text-[11px] font-semibold text-slate-700">
-              Medical notes (optional)
-            </label>
-            <textarea
-              value={info.medicalNotes}
-              onChange={(e) =>
-                setInfo((x) => ({ ...x, medicalNotes: e.target.value }))
-              }
-              placeholder="Allergies, conditions, medications…"
-              rows={4}
-              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
-            />
-            <p className="mt-1 text-[11px] text-slate-500">
-              Keep it short. This is shown to others in emergencies.
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={clearAll}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          Clear card details
-        </button>
-      </div>
-
-      {/* Preview */}
-      <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-        {renderCardBody(false)}
-      </div>
-
-      {/* Full screen */}
-      {fullScreen && (
-        <div className="fixed inset-0 z-[100] bg-white">
-          <div className="mx-auto max-w-3xl p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-2">
+            {/* Keep actions visible even when collapsed */}
+            <div
+              className="flex items-center gap-2"
+              onClick={(e) => e.stopPropagation()} // don't toggle <details>
+              onPointerDown={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
-                onClick={() => setFullScreen(false)}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+                onClick={() => setFullScreen(true)}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-50"
               >
-                Close
+                Full screen
               </button>
-
               <button
                 type="button"
                 onClick={shareCard}
-                className="rounded-full bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:opacity-90"
+                className="rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:opacity-90"
               >
                 Share
               </button>
             </div>
+          </div>
+        </summary>
 
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
-              {renderCardBody(true)}
+        {/* Editor */}
+        <div className="mt-4 space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700">
+                Full name (optional)
+              </label>
+              <input
+                value={info.fullName}
+                onChange={(e) =>
+                  setInfo((x) => ({ ...x, fullName: e.target.value }))
+                }
+                placeholder="e.g. Alex Smith"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+              />
             </div>
 
-            <div className="mt-4 text-sm text-slate-500">
-              Tip: Keep this screen open so someone else can read it.
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700">
+                Home country (optional)
+              </label>
+
+              {Array.isArray(countries) && countries.length ? (
+                <select
+                  value={info.homeCountryIso2}
+                  onChange={(e) =>
+                    setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
+                  }
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                >
+                  <option value="">—</option>
+                  {countries.map((c) => (
+                    <option key={c.iso2} value={c.iso2}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={info.homeCountryIso2}
+                  onChange={(e) =>
+                    setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
+                  }
+                  placeholder="e.g. GB"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+                />
+              )}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-semibold text-slate-700">
+                Medical notes (optional)
+              </label>
+              <textarea
+                value={info.medicalNotes}
+                onChange={(e) =>
+                  setInfo((x) => ({ ...x, medicalNotes: e.target.value }))
+                }
+                placeholder="Allergies, conditions, medications…"
+                rows={4}
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">
+                Keep it short. This is shown to others in emergencies.
+              </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={clearAll}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Clear card details
+          </button>
         </div>
-      )}
+
+        {/* Preview */}
+        <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+          {renderCardBody(false)}
+        </div>
+
+        {/* Full screen */}
+        {fullScreen && (
+          <div className="fixed inset-0 z-[100] bg-white">
+            <div className="mx-auto max-w-3xl p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFullScreen(false)}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
+                  onClick={shareCard}
+                  className="rounded-full bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:opacity-90"
+                >
+                  Share
+                </button>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+                {renderCardBody(true)}
+              </div>
+
+              <div className="mt-4 text-sm text-slate-500">
+                Tip: Keep this screen open so someone else can read it.
+              </div>
+            </div>
+          </div>
+        )}
+      </details>
     </section>
   );
 }
@@ -1366,7 +1381,9 @@ export default function App() {
   const { location, requestOnce: requestLocationOnce } = useGeolocation();
   const [detectedIso2, setDetectedIso2] = useState(null);
   const [detectingCountry, setDetectingCountry] = useState(false);
-  const [iceContacts, setIceContacts] = useState(() => loadIceContacts());
+  const [emergencyContacts, setEmergencyContacts] = useState(() =>
+    loadEmergencyContacts(),
+  );
   const [emergencyMode, setEmergencyMode] = useState(false);
 
   const [appError, setAppError] = useState("");
@@ -1493,8 +1510,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    saveIceContacts(iceContacts);
-  }, [iceContacts]);
+    saveEmergencyContacts(emergencyContacts);
+  }, [emergencyContacts]);
 
   const services = useMemo(
     () => emergencyCountry?.services || {},
@@ -1679,8 +1696,8 @@ export default function App() {
     selectedCountry,
     services,
     iso2ToFlag,
-    iceContacts,
-    setIceContacts,
+    emergencyContacts,
+    setEmergencyContacts,
     countries,
     onExit,
   }) {
@@ -1776,12 +1793,15 @@ export default function App() {
             </section>
           )}
 
-          {/* ICE + Info card */}
+          {/* Emergency Contacts + Info card */}
           <div className="mt-4 space-y-4">
-            <ICEContacts contacts={iceContacts} setContacts={setIceContacts} />
+            <ICEContacts
+              contacts={emergencyContacts}
+              setContacts={setEmergencyContacts}
+            />
             <EmergencyInfoCard
               countries={countries}
-              iceContacts={iceContacts}
+              emergencyContacts={emergencyContacts}
             />
           </div>
 
@@ -1806,8 +1826,8 @@ export default function App() {
         selectedCountry={emergencyCountry}
         services={services}
         iso2ToFlag={iso2ToFlag}
-        iceContacts={iceContacts}
-        setIceContacts={setIceContacts}
+        emergencyContacts={emergencyContacts}
+        setEmergencyContacts={setEmergencyContacts}
         countries={countries}
         onExit={() => setEmergencyMode(false)}
       />
@@ -2066,11 +2086,14 @@ export default function App() {
               <WhatToSayAll defaultService="general" />
             </section>
 
-            <ICEContacts contacts={iceContacts} setContacts={setIceContacts} />
+            <ICEContacts
+              contacts={emergencyContacts}
+              setContacts={setEmergencyContacts}
+            />
 
             <EmergencyInfoCard
               countries={countries}
-              iceContacts={iceContacts}
+              emergencyContacts={emergencyContacts}
             />
 
             {/* Nearby help section */}
