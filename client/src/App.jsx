@@ -7,6 +7,7 @@ const CACHE_COUNTRIES_KEY = "ec_cached_countries_v1";
 const CACHE_COUNTRY_DETAILS_PREFIX = "ec_cached_country_v1_"; // + ISO2
 const STORAGE_MANUAL_KEY = "ec_country_manually_set";
 const ICE_STORAGE_KEY = "ec_ice_contacts_v1";
+const INFO_CARD_STORAGE_KEY = "ec_info_card_v1";
 
 function WhatToSayAll({ defaultService = "general" }) {
   const [service, setService] = useState(defaultService);
@@ -579,6 +580,46 @@ function loadIceContacts() {
   }
 }
 
+function loadInfoCard() {
+  try {
+    const raw = localStorage.getItem(INFO_CARD_STORAGE_KEY);
+    if (!raw) {
+      return {
+        version: 1,
+        fullName: "",
+        homeCountryIso2: "",
+        medicalNotes: "",
+      };
+    }
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.version === 1) {
+      return {
+        version: 1,
+        fullName: typeof parsed.fullName === "string" ? parsed.fullName : "",
+        homeCountryIso2:
+          typeof parsed.homeCountryIso2 === "string"
+            ? parsed.homeCountryIso2
+            : "",
+        medicalNotes:
+          typeof parsed.medicalNotes === "string" ? parsed.medicalNotes : "",
+      };
+    }
+    return { version: 1, fullName: "", homeCountryIso2: "", medicalNotes: "" };
+  } catch {
+    return { version: 1, fullName: "", homeCountryIso2: "", medicalNotes: "" };
+  }
+}
+
+function saveInfoCard(info) {
+  const payload = {
+    version: 1,
+    fullName: info.fullName || "",
+    homeCountryIso2: info.homeCountryIso2 || "",
+    medicalNotes: info.medicalNotes || "",
+  };
+  localStorage.setItem(INFO_CARD_STORAGE_KEY, JSON.stringify(payload));
+}
+
 function saveIceContacts(contacts) {
   // Future auth: keep versioned object so you can migrate and sync later.
   const payload = {
@@ -633,18 +674,12 @@ function confirmAndCall(label, number) {
   }
 }
 
-function ICEContacts() {
-  const [contacts, setContacts] = useState(() => loadIceContacts());
+function ICEContacts({ contacts, setContacts }) {
   const [adding, setAdding] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [relationship, setRelationship] = useState("");
-
-  // Persist whenever contacts change
-  useEffect(() => {
-    saveIceContacts(contacts);
-  }, [contacts]);
 
   const phoneHref = safeTelHref(phone);
 
@@ -1002,6 +1037,317 @@ function mapsLink(lat, lon) {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 }
 
+function EmergencyInfoCard({ countries, iceContacts }) {
+  const [info, setInfo] = useState(() => loadInfoCard());
+  const [fullScreen, setFullScreen] = useState(false);
+
+  useEffect(() => {
+    saveInfoCard(info);
+  }, [info]);
+
+  const homeCountry =
+    info.homeCountryIso2 && Array.isArray(countries)
+      ? countries.find((c) => c.iso2 === info.homeCountryIso2)
+      : null;
+
+  function buildShareText() {
+    const lines = [];
+
+    lines.push("Emergency info");
+
+    if (info.fullName.trim()) lines.push(`Name: ${info.fullName.trim()}`);
+
+    if (homeCountry) {
+      lines.push(`Home country: ${homeCountry.name}`);
+    } else if (info.homeCountryIso2.trim()) {
+      lines.push(`Home country: ${info.homeCountryIso2.trim()}`);
+    }
+
+    if (iceContacts?.length) {
+      lines.push("");
+      lines.push("ICE contacts:");
+      for (const c of iceContacts) {
+        const rel = c.relationship ? ` (${c.relationship})` : "";
+        lines.push(`- ${c.name}${rel}: ${c.phone}`);
+      }
+    }
+
+    if (info.medicalNotes.trim()) {
+      lines.push("");
+      lines.push("Medical notes:");
+      lines.push(info.medicalNotes.trim());
+    }
+
+    lines.push("");
+    lines.push("User-provided information. Verify when possible.");
+
+    return lines.join("\n");
+  }
+
+  async function shareCard() {
+    const text = buildShareText();
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Emergency info", text });
+        return;
+      }
+
+      await navigator.clipboard.writeText(text);
+      window.alert("Copied emergency info to clipboard.");
+    } catch {
+      window.prompt("Copy emergency info:", text);
+    }
+  }
+
+  function clearAll() {
+    const ok = window.confirm("Clear emergency info card details?");
+    if (!ok) return;
+
+    setInfo({
+      version: 1,
+      fullName: "",
+      homeCountryIso2: "",
+      medicalNotes: "",
+    });
+  }
+
+  function renderCardBody(large) {
+    const titleSize = large ? "text-2xl sm:text-3xl" : "text-sm";
+    const valueSize = large ? "text-lg sm:text-xl" : "text-sm";
+    const sectionTitle = large ? "text-base sm:text-lg" : "text-xs";
+    const subtle = large ? "text-sm" : "text-[11px]";
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <div
+            className={`${titleSize} font-semibold tracking-tight text-slate-900`}
+          >
+            Emergency info
+          </div>
+          <div className={`mt-1 ${subtle} text-slate-500`}>
+            User-provided information. Verify when possible.
+          </div>
+        </div>
+
+        {(info.fullName.trim() ||
+          homeCountry ||
+          info.homeCountryIso2.trim()) && (
+          <div className="space-y-2">
+            <div className={`${sectionTitle} font-semibold text-slate-700`}>
+              Personal
+            </div>
+
+            {info.fullName.trim() && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Name:</span>{" "}
+                {info.fullName.trim()}
+              </div>
+            )}
+
+            {(homeCountry || info.homeCountryIso2.trim()) && (
+              <div className={`${valueSize} text-slate-900`}>
+                <span className="font-semibold">Home country:</span>{" "}
+                {homeCountry ? homeCountry.name : info.homeCountryIso2.trim()}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <div className={`${sectionTitle} font-semibold text-slate-700`}>
+            ICE contacts
+          </div>
+
+          {!iceContacts?.length ? (
+            <div className={`${valueSize} text-slate-600`}>None added yet.</div>
+          ) : (
+            <div className="space-y-2">
+              {iceContacts.map((c) => {
+                const rel = c.relationship ? ` • ${c.relationship}` : "";
+                return (
+                  <div key={c.id} className={`${valueSize} text-slate-900`}>
+                    <div className="font-semibold">{c.name}</div>
+                    <div className={`${subtle} text-slate-600`}>
+                      {c.phone}
+                      {rel}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {info.medicalNotes.trim() && (
+          <div className="space-y-2">
+            <div className={`${sectionTitle} font-semibold text-slate-700`}>
+              Medical notes
+            </div>
+            <div
+              className={[
+                valueSize,
+                "text-slate-900 whitespace-pre-wrap",
+                large ? "leading-relaxed" : "",
+              ].join(" ")}
+            >
+              {info.medicalNotes.trim()}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-slate-900">
+            Emergency info card
+          </div>
+          <div className="mt-1 text-xs text-slate-500">
+            Quick to show or share. Stored on this device.
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setFullScreen(true)}
+            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold hover:bg-slate-50"
+          >
+            Full screen
+          </button>
+          <button
+            type="button"
+            onClick={shareCard}
+            className="rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-semibold hover:opacity-90"
+          >
+            Share
+          </button>
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className="mt-4 space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Full name (optional)
+            </label>
+            <input
+              value={info.fullName}
+              onChange={(e) =>
+                setInfo((x) => ({ ...x, fullName: e.target.value }))
+              }
+              placeholder="e.g. Alex Smith"
+              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Home country (optional)
+            </label>
+
+            {Array.isArray(countries) && countries.length ? (
+              <select
+                value={info.homeCountryIso2}
+                onChange={(e) =>
+                  setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
+                }
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+              >
+                <option value="">—</option>
+                {countries.map((c) => (
+                  <option key={c.iso2} value={c.iso2}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={info.homeCountryIso2}
+                onChange={(e) =>
+                  setInfo((x) => ({ ...x, homeCountryIso2: e.target.value }))
+                }
+                placeholder="e.g. GB"
+                className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+              />
+            )}
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Medical notes (optional)
+            </label>
+            <textarea
+              value={info.medicalNotes}
+              onChange={(e) =>
+                setInfo((x) => ({ ...x, medicalNotes: e.target.value }))
+              }
+              placeholder="Allergies, conditions, medications…"
+              rows={4}
+              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/15"
+            />
+            <p className="mt-1 text-[11px] text-slate-500">
+              Keep it short. This is shown to others in emergencies.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={clearAll}
+          className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Clear card details
+        </button>
+      </div>
+
+      {/* Preview */}
+      <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+        {renderCardBody(false)}
+      </div>
+
+      {/* Full screen */}
+      {fullScreen && (
+        <div className="fixed inset-0 z-[100] bg-white">
+          <div className="mx-auto max-w-3xl p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setFullScreen(false)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+              >
+                Close
+              </button>
+
+              <button
+                type="button"
+                onClick={shareCard}
+                className="rounded-full bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:opacity-90"
+              >
+                Share
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+              {renderCardBody(true)}
+            </div>
+
+            <div className="mt-4 text-sm text-slate-500">
+              Tip: Keep this screen open so someone else can read it.
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function App() {
   const [countries, setCountries] = useState([]);
   const [selectedIso2, setSelectedIso2] = useState(
@@ -1020,6 +1366,8 @@ export default function App() {
   const { location, requestOnce: requestLocationOnce } = useGeolocation();
   const [detectedIso2, setDetectedIso2] = useState(null);
   const [detectingCountry, setDetectingCountry] = useState(false);
+  const [iceContacts, setIceContacts] = useState(() => loadIceContacts());
+
   const [appError, setAppError] = useState("");
 
   async function fetchCountries() {
@@ -1128,6 +1476,10 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    saveIceContacts(iceContacts);
+  }, [iceContacts]);
 
   const services = useMemo(
     () => selectedCountry?.services || {},
@@ -1509,7 +1861,12 @@ export default function App() {
               <WhatToSayAll defaultService="general" />
             </section>
 
-            <ICEContacts />
+            <ICEContacts contacts={iceContacts} setContacts={setIceContacts} />
+
+            <EmergencyInfoCard
+              countries={countries}
+              iceContacts={iceContacts}
+            />
 
             {/* Nearby help section */}
             <section className="rounded-3xl bg-white border border-slate-200/70 shadow-sm p-4 sm:p-5">
