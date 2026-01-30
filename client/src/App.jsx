@@ -758,56 +758,72 @@ export default function App() {
                 <label className="block text-xs font-medium text-slate-600">
                   Country list
                 </label>
-                <select
-                  value={selectedIso2}
-                  onChange={(e) => {
-                    const iso2 = e.target.value;
-                    setSelectedIso2(iso2);
-                    localStorage.setItem(STORAGE_MANUAL_KEY, "1");
-                  }}
-                  className={[
-                    "w-full rounded-2xl border border-slate-200 bg-white",
-                    "px-3 py-2.5 text-sm",
-                    "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
-                  ].join(" ")}
-                >
-                  {filteredCountries.map((c) => (
-                    <option key={c.iso2} value={c.iso2}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+
+                <div className="flex items-stretch gap-2">
+                  <select
+                    value={selectedIso2}
+                    onChange={(e) => {
+                      const iso2 = e.target.value;
+                      setSelectedIso2(iso2);
+                      localStorage.setItem(STORAGE_MANUAL_KEY, "1");
+                    }}
+                    className={[
+                      "flex-1 min-w-0 rounded-2xl border border-slate-200 bg-white",
+                      "px-3 py-2.5 text-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-slate-900/15 focus:border-slate-300",
+                    ].join(" ")}
+                  >
+                    {filteredCountries.map((c) => (
+                      <option key={c.iso2} value={c.iso2}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={useMyLocation}
+                    disabled={detectingCountry}
+                    title="Use my location"
+                    aria-label="Use my location"
+                    className={[
+                      "shrink-0 rounded-2xl px-3",
+                      "border border-slate-200 bg-white",
+                      "hover:bg-slate-50 active:scale-[0.99] transition",
+                      "disabled:opacity-60 disabled:pointer-events-none",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                      "inline-flex items-center justify-center",
+                    ].join(" ")}
+                  >
+                    {detectingCountry ? (
+                      // tiny spinner
+                      <span
+                        className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      // location icon (no dependency)
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-5 w-5 text-slate-700"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" />
+                        <path d="M12 11a2 2 0 100-4 2 2 0 000 4z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
                 {autoSuggested && (
                   <div className="mt-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
                     We selected a country automatically — please confirm it's
                     correct.
                   </div>
                 )}
-                {/* <button
-                  type="button"
-                  onClick={useMyLocation}
-                  className={[
-                    "w-full rounded-2xl px-3 py-2.5 text-sm font-semibold",
-                    "border border-slate-200 bg-white",
-                    "hover:bg-slate-50 active:scale-[0.99] transition",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                  ].join(" ")}
-                >
-                  Use my location
-                </button> */}
-                <button
-                  type="button"
-                  onClick={useMyLocation}
-                  className={[
-                    "w-full rounded-2xl px-3 py-2.5 text-sm font-semibold",
-                    "border border-slate-200 bg-white",
-                    "hover:bg-slate-50 active:scale-[0.99] transition",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                    detectingCountry ? "opacity-70 pointer-events-none" : "",
-                  ].join(" ")}
-                >
-                  {detectingCountry ? "Detecting…" : "Use my location"}
-                </button>
 
                 {/* Location status (truthful state machine) */}
                 {location.status !== "not_requested" && (
@@ -893,30 +909,6 @@ export default function App() {
                 </p>
               )}
 
-              {selectedCountry && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-xs uppercase tracking-wide text-slate-500">
-                    Emergency numbers for
-                  </div>
-
-                  <div className="mt-1 flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900">
-                    <span className="text-2xl">
-                      {iso2ToFlag(selectedCountry.iso2)}
-                    </span>
-                    <span>{selectedCountry.name}</span>
-                  </div>
-
-                  {selectedCountry?.metadata?.lastVerified && (
-                    <div className="mt-2 text-xs text-slate-600">
-                      Last verified:{" "}
-                      <span className="font-medium text-slate-700">
-                        {selectedCountry.metadata.lastVerified}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {appError && (
                 <div className="rounded-2xl border border-red-200 bg-white p-3 space-y-2">
                   <p className="text-sm text-red-700">{appError}</p>
@@ -950,12 +942,19 @@ export default function App() {
                   <div className="mt-1">
                     {selectedCountry ? (
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="text-xs text-slate-500">
-                          Current country:
+                        <span className="text-lg leading-none">
+                          {iso2ToFlag(selectedCountry.iso2)}
                         </span>
+
                         <span className="text-sm font-semibold text-slate-800 truncate">
                           {selectedCountry.name}
                         </span>
+
+                        {selectedCountry?.metadata?.lastVerified && (
+                          <span className="text-[11px] text-slate-500">
+                            • Verified {selectedCountry.metadata.lastVerified}
+                          </span>
+                        )}
 
                         {isOffline && (
                           <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
